@@ -5,21 +5,23 @@
 <h1 align="center">OneFile</h1>
 
 <p align="center">
-  轻量、可自托管的多云对象存储上传与管理平台。
+  A lightweight, self-hosted upload and object-storage management platform.
   <br />
-  用一个网页和一组 API key，把 S3、R2、B2、OCI、OSS、COS 聚合成统一的图床和文件上传入口。
+  One web app and one API-key system for S3, R2, B2, OCI, Aliyun OSS, and Tencent COS.
 </p>
 
 <p align="center">
-  <a href="https://onefile.huzhihui.com">在线预览</a>
+  <a href="https://onefile.huzhihui.com">Live Demo</a>
   ·
-  <a href="#快速开始">快速开始</a>
+  <a href="https://zhihui-hu.github.io/onefile/">Documentation</a>
   ·
-  <a href="#图床集成">图床集成</a>
+  <a href="#quick-start">Quick Start</a>
   ·
-  <a href="#支持的存储">支持的存储</a>
+  <a href="#image-hosting-integration">Image Hosting Integration</a>
   ·
-  <a href="#许可证">许可证</a>
+  <a href="#supported-storage-providers">Storage Providers</a>
+  ·
+  <a href="#license">License</a>
 </p>
 
 <p align="center">
@@ -34,105 +36,106 @@
   <img src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker" />
 </p>
 
-OneFile 是一个很轻的对象存储上传后台，适合拿来做自建图床、文件投递入口，或者统一管理多家对象存储。你可以把 AWS S3、Cloudflare R2、Backblaze B2、Oracle Object Storage、阿里云 OSS、腾讯云 COS 接到一个页面里，通过网页上传和管理文件；也可以生成 API key，把上传能力快速接进图床项目、Markdown 编辑器、脚本、CI 或第三方系统。
+OneFile is a compact object-storage upload console for self-hosted image hosting, file drop pages, and multi-cloud bucket management. It connects AWS S3, Cloudflare R2, Backblaze B2, Oracle Object Storage, Aliyun OSS, and Tencent COS behind one interface. Users can upload and manage files from the browser, while external tools can upload through scoped API keys.
 
-## 功能概览
+## Features
 
-| 能力                 | 说明                                                                     |
-| -------------------- | ------------------------------------------------------------------------ |
-| 多云存储统一管理     | 在一个后台维护多个对象存储账号、bucket、公开访问域名和上传策略。         |
-| 网页上传和文件浏览   | 支持上传、目录浏览、搜索、预览、复制链接、删除文件。                     |
-| API key 上传         | 给图床、Markdown 编辑器、脚本、CI、第三方系统提供统一上传入口。          |
-| 公开上传页           | 生成可分享的上传入口，支持二维码分享，不暴露后台账号和 raw API key。     |
-| 图片压缩             | API 上传和公开上传可启用 WebP 压缩，适合博客、论坛、文档图片流。         |
-| 大文件上传           | 提供 multipart 上传接口，服务端统一处理分片上传、完成和中止流程。        |
-| 轻量部署和迁移       | 默认 SQLite + Docker volume，支持 SQL 导入导出和应用密钥迁移。           |
-| 自动 bucket 负载均衡 | API key 不固定 bucket 时，服务端会在当前用户可用 bucket 中自动选择目标。 |
+| Capability                       | Description                                                                                                    |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Multi-cloud storage management   | Manage storage accounts, buckets, public base URLs, and upload policies in one console.                        |
+| Browser upload and file browsing | Upload files, browse folders, search objects, preview images, copy links, and delete objects.                  |
+| API-key uploads                  | Give image hosting apps, Markdown editors, scripts, CI jobs, and third-party systems one upload endpoint.      |
+| Public upload pages              | Generate shareable upload pages with QR codes without exposing admin accounts or raw API keys.                 |
+| Image compression                | API uploads and public upload pages can convert images to WebP for blogs, forums, and documentation workflows. |
+| Large-file uploads               | Multipart upload endpoints handle create, part upload, completion, and abort flows.                            |
+| Lightweight deployment           | SQLite by default, Docker-ready, and designed for single-node self-hosting.                                    |
+| Backup and migration             | Export and import SQL backups, including secret metadata needed to decrypt stored credentials after migration. |
+| Automatic bucket selection       | If an API key is not bound to one bucket, OneFile can select an available bucket for the user.                 |
 
-## 产品预览
+## Product Preview
 
-后台围绕“存储账号、bucket、文件、API key、公开上传入口”组织，适合日常反复上传和管理图片、附件、构建产物或临时投递文件。
+The app is organized around storage accounts, buckets, files, API keys, and public upload links.
 
 <table>
   <tr>
     <td width="50%">
-      <strong>文件管理</strong>
+      <strong>File management</strong>
       <br />
-      <img src="https://img.huzhihui.com/uploads/2026/05/onefile-1.png" alt="OneFile 界面截图 1" />
+      <img src="https://img.huzhihui.com/uploads/2026/05/onefile-1.png" alt="OneFile file management screenshot" />
     </td>
     <td width="50%">
-      <strong>对象存储配置</strong>
+      <strong>Storage configuration</strong>
       <br />
-      <img src="https://img.huzhihui.com/uploads/2026/05/onefile-2.png" alt="OneFile 界面截图 2" />
+      <img src="https://img.huzhihui.com/uploads/2026/05/onefile-2.png" alt="OneFile storage configuration screenshot" />
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <strong>API key 和上传策略</strong>
+      <strong>API keys and upload policies</strong>
       <br />
-      <img src="https://img.huzhihui.com/uploads/2026/05/onefile-3.png" alt="OneFile 界面截图 3" />
+      <img src="https://img.huzhihui.com/uploads/2026/05/onefile-3.png" alt="OneFile API key screenshot" />
     </td>
     <td width="50%">
-      <strong>公开上传页面</strong>
+      <strong>Public upload page</strong>
       <br />
-      <img src="https://img.huzhihui.com/uploads/2026/05/onefile-4.png" alt="OneFile 界面截图 4" />
+      <img src="https://img.huzhihui.com/uploads/2026/05/onefile-4.png" alt="OneFile public upload page screenshot" />
     </td>
   </tr>
 </table>
 
-## 项目亮点
+## Why OneFile
 
-- **SQLite，非常轻量**：默认只需要一个 SQLite 数据库文件，不依赖 MySQL、PostgreSQL、Redis，单机 Docker 部署很省心。
-- **支持导入导出，方便迁移**：管理员可以导出 SQL 备份，再在新环境导入；迁移服务器、重建容器、搬家都更简单。
-- **快速集成图床项目**：网页登录后生成 API key，外部图床、脚本或编辑器用 `Authorization: Bearer ...` 就能上传图片。
-- **上传后的图片可管理**：图床上传不是黑盒，后台仍然可以浏览、搜索、复制链接、删除文件，公开上传链接也支持二维码分享。
-- **图片压缩**：API 上传和公开上传可开启 WebP 压缩，适合博客、论坛、Markdown 图片流。
-- **多 bucket 负载均衡**：上传接口可以不传 `bucket_id`，OneFile 会自动选择当前用户可用 bucket，分散上传压力。
-- **多云对象存储聚合**：支持 AWS S3、Cloudflare R2、Backblaze B2、Oracle Object Storage、阿里云 OSS、腾讯云 COS。
-- **服务端统一写入对象存储**：浏览器和外部工具只和 OneFile 通信，认证、压缩、bucket 选择和对象存储写入都由服务端收口。
+- **SQLite-first and small**: no MySQL, PostgreSQL, or Redis required for the default deployment.
+- **Easy migration**: export SQL backups from the admin UI and import them in a new environment.
+- **Fast image-hosting integration**: generate an API key and upload with `Authorization: Bearer ...`.
+- **Uploads stay manageable**: files uploaded through external tools can still be browsed, copied, previewed, and deleted in the console.
+- **Image compression built in**: optional WebP compression is useful for Markdown, blog, forum, and documentation images.
+- **Multi-bucket workflow**: API keys can target a fixed bucket or let OneFile choose from available buckets.
+- **Multi-provider abstraction**: S3-compatible storage, OCI, Aliyun OSS, and Tencent COS share one internal adapter interface.
+- **Server-side storage writes**: browsers and external tools only talk to OneFile; authentication, compression, bucket selection, and object writes are handled server-side.
 
-## 适合场景
+## Use Cases
 
-- 自建图床后台
-- Markdown / 博客 / 论坛图片上传
-- 给外部工具提供统一上传 API
-- 多个对象存储账号、多个 bucket 的统一管理
-- 轻量文件投递页面或公开上传入口
-- CI 产物、备份文件、素材文件上传
+- Self-hosted image hosting
+- Markdown, blog, and forum image uploads
+- A unified upload API for external tools
+- Managing several object-storage accounts and buckets
+- Lightweight public file drop pages
+- CI artifact, backup, and media uploads
 
-## 支持的存储
+## Supported Storage Providers
 
-| 存储服务              | 接入方式               |
-| --------------------- | ---------------------- |
-| AWS S3                | 标准 S3 API            |
-| Cloudflare R2         | S3 兼容 API            |
-| Backblaze B2          | S3 兼容 API            |
-| Oracle Object Storage | OCI Object Storage API |
-| 阿里云 OSS            | Aliyun OSS SDK         |
-| 腾讯云 COS            | Tencent COS SDK        |
+| Provider              | Integration                                         |
+| --------------------- | --------------------------------------------------- |
+| AWS S3                | Standard S3 API                                     |
+| Cloudflare R2         | S3-compatible API                                   |
+| Backblaze B2          | S3-compatible API                                   |
+| Oracle Object Storage | OCI Object Storage API, with S3-compatible fallback |
+| Aliyun OSS            | Aliyun OSS SDK                                      |
+| Tencent COS           | Tencent COS SDK                                     |
 
-## 架构图
+## Architecture
 
 ```mermaid
 flowchart LR
-  user["登录用户 / 管理后台"]
-  tools["图床项目 / Markdown 编辑器 / 脚本 / CI"]
-  public["公开上传链接 / 二维码"]
+  user["Signed-in user / Admin console"]
+  tools["Image host / Markdown editor / Script / CI"]
+  public["Public upload link / QR code"]
 
-  app["OneFile<br/>Next.js 应用"]
+  app["OneFile<br/>Next.js app"]
   auth["GitHub OAuth<br/>Session / API key"]
-  db["SQLite<br/>用户、账号、bucket、API key、上传状态"]
-  backup["SQL 导入导出<br/>迁移和备份"]
+  db["SQLite<br/>Users, accounts, buckets, API keys, upload state"]
+  backup["SQL import/export<br/>Backup and migration"]
 
-  scheduler["上传调度<br/>压缩策略 / bucket 负载均衡"]
-  single["Direct Upload API<br/>小文件 / 图片压缩"]
-  multipart["Multipart Upload API<br/>服务端分片上传"]
+  scheduler["Upload orchestration<br/>Compression / bucket selection"]
+  single["Direct Upload API<br/>Small files / image compression"]
+  multipart["Multipart Upload API<br/>Server-side multipart flow"]
 
-  storage["对象存储<br/>S3 / R2 / B2 / OCI / OSS / COS"]
+  storage["Object storage<br/>S3 / R2 / B2 / OCI / OSS / COS"]
 
   user --> app
   tools -->|"Bearer API key"| app
-  public -->|"UUID 上传入口"| app
+  public -->|"UUID upload page"| app
 
   app --> auth
   app <--> db
@@ -144,99 +147,143 @@ flowchart LR
   single --> storage
   multipart --> storage
 
-  app -->|"文件浏览 / 删除 / 复制链接"| storage
+  app -->|"Browse / delete / copy links"| storage
 ```
 
-## 快速开始
+## Quick Start
 
-最快的方式是直接跑官方 GHCR 镜像。默认服务端口是 `27507`，数据保存在 Docker volume `onefile-data`。
+The fastest way to run OneFile is the GHCR image. The default service port is `27507`, and persistent data is stored in the Docker volume `onefile-data`.
 
-1. 创建 GitHub OAuth App，回调地址填写：
+1. Create a GitHub OAuth App and set the callback URL:
 
    ```text
-   https://[域名/ip:port]/callback/auth
+   https://[domain-or-ip:port]/callback/auth
    ```
 
-2. docker：
+2. Run the container:
 
    ```bash
-   docker run -d --name onefile --restart unless-stopped -p 27507:27507 -e GITHUB_CLIENT_ID=your_github_client_id -e GITHUB_CLIENT_SECRET=your_github_client_secret -v onefile-data:/app/data ghcr.io/zhihui-hu/onefile:latest
+   docker run -d --name onefile --restart unless-stopped \
+     -p 27507:27507 \
+     -e GITHUB_CLIENT_ID=your_github_client_id \
+     -e GITHUB_CLIENT_SECRET=your_github_client_secret \
+     -v onefile-data:/app/data \
+     ghcr.io/zhihui-hu/onefile:latest
    ```
 
-3. 打开应用：
+3. Open the app:
 
    ```text
-   http://[域名/ip:port]
+   http://[domain-or-ip:port]
    ```
 
-4. 登录后按这个顺序使用：
-   - 添加对象存储账号
-   - 同步 bucket
-   - 配置 bucket 公开访问地址
-   - 创建 API key
-   - 用 API key 接入你的图床、脚本或上传工具
+4. After login:
+   - Add an object-storage account.
+   - Sync buckets.
+   - Configure each bucket's public base URL.
+   - Create an API key.
+   - Use the API key from image hosts, scripts, editors, or upload tools.
 
-## 图床集成
+## Image Hosting Integration
 
-OneFile 的 API key 适合直接接入图床项目。创建 API key 后，外部系统只需要把 key 放到请求头：
+OneFile API keys are designed for external upload workflows. Create an API key in the app, then send it in the request header:
 
 ```text
 Authorization: Bearer ofk_xxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-常用方式有两种：
+There are two common integration paths:
 
-- **API 上传**：适合图床项目、Markdown 编辑器、脚本和 CI。
-- **公开上传链接**：适合生成一个可分享的网页入口，别人不需要登录，也看不到 raw API key。
+- **API upload**: for image-hosting apps, Markdown editors, scripts, CI jobs, and third-party systems.
+- **Public upload page**: for a shareable browser page where visitors can upload without seeing the raw API key.
 
-上传后的图片仍然可以在 OneFile 后台管理，可以复制链接、查看目录、删除对象；如果开启图片压缩，上传图片会转为 WebP；如果 API key 没有固定 bucket，服务端会按负载均衡策略选择 bucket。
+Uploaded images remain manageable in OneFile. If image compression is enabled, supported images are converted to WebP. If the API key is not pinned to a bucket, OneFile selects an available bucket for the current user.
 
-## 技术栈
+## Tech Stack
 
-- **前端**：Next.js 16、React 19、TypeScript、Tailwind CSS 4、shadcn/ui、Lucide React
-- **数据和状态**：TanStack Query v5、TanStack Table v8
-- **后端和存储**：Next.js Route Handlers、Drizzle ORM、better-sqlite3、对象存储 SDK
-- **部署**：Docker / Docker Compose，默认镜像 `ghcr.io/zhihui-hu/onefile:latest`
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS 4, shadcn/ui, Lucide React
+- **Client data and tables**: TanStack Query v5, TanStack Table v8
+- **Backend**: Next.js Route Handlers running on Node.js
+- **Database**: Drizzle ORM with `better-sqlite3`
+- **Storage**: AWS SDK for S3-compatible providers, Aliyun OSS SDK, Tencent COS SDK, OCI adapter
+- **Deployment**: Docker / Docker Compose with `ghcr.io/zhihui-hu/onefile:latest`
+
+## Project Structure
+
+```text
+src/app/                         Next.js App Router pages and API routes
+src/app/api/**/route.ts          Node.js backend endpoints
+src/app/(main)/components/       Main file-management console
+src/app/[uuid]/                  Public upload pages
+src/app/api-docs/                In-app API documentation
+src/lib/db/                      SQLite client, Drizzle schema, SQL backup helpers
+src/lib/storage/                 Storage provider adapters and shared types
+src/lib/auth/                    GitHub OAuth, sessions, and API-key auth
+src/lib/uploads/                 Direct upload and multipart orchestration
+src/components/ui/               shadcn/ui primitives
+deploy/                          Nginx deployment sample
+docs/                            GitHub Pages documentation site
+```
+
+## API Surface
+
+The backend is implemented with Next.js Route Handlers under `src/app/api`.
+
+| Area             | Routes                                                                                                                            |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Auth             | `/api/auth/github/start`, `/api/auth/github/callback`, `/api/auth/logout`, `/api/me`                                              |
+| Storage accounts | `/api/storage/accounts`, `/api/storage/accounts/:id`, `/api/storage/accounts/:id/check`, `/api/storage/accounts/:id/sync-buckets` |
+| Buckets          | `/api/storage/buckets`, `/api/storage/buckets/:id`                                                                                |
+| Files            | `/api/files`, `/api/files/folders`                                                                                                |
+| API keys         | `/api/file-api-keys`, `/api/file-api-keys/:id`                                                                                    |
+| Uploads          | `/api/uploads`, `/api/uploads/direct`, `/api/uploads/:id/parts/upload`, `/api/uploads/:id/complete`, `/api/uploads/:id/abort`     |
+| Public uploads   | `/api/public-uploads/:uuid`                                                                                                       |
+| Backup           | `/api/admin/sql-backup`                                                                                                           |
+
+The app also includes in-product API documentation at `/api-docs`.
 
 <details>
-<summary>展开：部署和迁移说明</summary>
+<summary>Deployment and migration notes</summary>
 
-### Docker Compose 部署
+### Docker Compose
 
-`docker-compose.yml` 默认使用：
+`docker-compose.yml` uses this image by default:
 
 ```text
 ghcr.io/zhihui-hu/onefile:latest
 ```
 
-先创建 `.env`：
+Create `.env` first:
 
 ```bash
 GITHUB_CLIENT_ID=your_github_client_id
 GITHUB_CLIENT_SECRET=your_github_client_secret
 
-# 可选：不填时会自动生成并保存到 /app/data/.onefile-secret
+# Optional but recommended for production or migration.
+# If empty, OneFile generates /app/data/.onefile-secret in Docker
+# or ./data/.onefile-secret in local development.
 # APP_SECRET=replace_with_a_long_random_secret
 
-# 可选：反向代理不能正确传递 Host / X-Forwarded-* 时再填写
+# Optional. Use only when your reverse proxy cannot forward
+# Host, X-Forwarded-Proto, and X-Forwarded-Host correctly.
 # APP_ORIGIN=https://onefile.example.com
 ```
 
-启动：
+Start the service:
 
 ```bash
 docker compose pull
 docker compose up -d
 ```
 
-查看状态：
+Check status and logs:
 
 ```bash
 docker compose ps
 docker compose logs -f onefile
 ```
 
-升级：
+Upgrade:
 
 ```bash
 git pull
@@ -244,55 +291,53 @@ docker compose pull
 docker compose up -d
 ```
 
-### 数据位置
+### Data location
 
-Docker 部署默认使用 SQLite：
+The Docker image stores SQLite data at:
 
 ```text
 /app/data/onefile.sqlite
 ```
 
-并通过 Docker volume 持久化：
+The compose file persists it through:
 
 ```text
 onefile-data
 ```
 
-不要删除 `onefile-data`，否则用户、存储账号、API key、token 和上传状态都会丢失。
+Do not delete `onefile-data` unless you intentionally want to remove users, storage accounts, API keys, tokens, and upload state.
 
-### 密钥
+### Application secret
 
-OneFile 只需要一个应用密钥，用于 session 签名和存储凭证加密。优先级：
+OneFile needs one application secret for session signing and encrypted storage credentials. Resolution order:
 
-1. `.env` 里的 `APP_SECRET`
-2. 旧配置兼容项：`SESSION_SECRET` 和 `STORAGE_CREDENTIAL_ENCRYPTION_KEY`
-3. 自动生成的 `/app/data/.onefile-secret`
+1. `APP_SECRET` from `.env`
+2. Legacy compatibility values: `SESSION_SECRET` and `STORAGE_CREDENTIAL_ENCRYPTION_KEY`
+3. Auto-generated `/app/data/.onefile-secret`
 
-单机部署可以不填 `APP_SECRET`，应用会自动生成并保存到 volume。迁移、多容器或重建 volume 时，建议显式设置同一个 `APP_SECRET`。
+For single-node Docker usage, leaving `APP_SECRET` empty is acceptable because the app stores a generated secret in the volume. For migration, multi-container setups, or volume rebuilds, set a stable `APP_SECRET`.
 
-### 导入导出
+### SQL import and export
 
-管理员可以在「导入导出」里导出 SQL 备份。导出的文件名会携带密钥信息，导入时应用会同步 `.onefile-secret`，这样迁移后仍然可以解密原有对象存储凭证。
+Administrators can export SQL backups from the app. Exported filenames include secret metadata, and importing the backup lets the app sync `.onefile-secret`, so migrated deployments can still decrypt existing storage credentials.
 
-请保留导出的原始文件名，不要手动重命名。
+Keep the original exported filename. Do not rename it manually.
 
-### 反向代理
+### Reverse proxy
 
-生产环境建议通过 Nginx、Caddy、Traefik 或云厂商负载均衡代理到：
+In production, put Nginx, Caddy, Traefik, or a cloud load balancer in front of:
 
 ```text
 127.0.0.1:27507
 ```
 
-如果代理不能正确传递 `Host`、`X-Forwarded-Proto`、`X-Forwarded-Host`，再配置：
+If the proxy does not forward `Host`, `X-Forwarded-Proto`, and `X-Forwarded-Host` correctly, set:
 
 ```bash
 APP_ORIGIN=https://onefile.example.com
 ```
 
-### 本地构建镜像
-
-如果不想使用 GHCR 镜像，也可以本地构建：
+### Local image build
 
 ```bash
 docker build -t onefile .
@@ -307,9 +352,9 @@ docker run -d --name onefile \
 </details>
 
 <details>
-<summary>展开：API 上传最小示例</summary>
+<summary>Minimal API upload example</summary>
 
-先准备环境变量：
+Prepare environment variables:
 
 ```bash
 export ONEFILE_BASE_URL="https://onefile.example.com"
@@ -317,7 +362,7 @@ export ONEFILE_API_KEY="ofk_xxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 export FILE="./image.png"
 ```
 
-小文件或图片可以直接提交给 OneFile 服务端：
+Upload a small file or image through the direct upload API:
 
 ```bash
 curl -fsS -X POST "$ONEFILE_BASE_URL/api/uploads/direct" \
@@ -325,7 +370,7 @@ curl -fsS -X POST "$ONEFILE_BASE_URL/api/uploads/direct" \
   -F "file=@$FILE"
 ```
 
-如果需要指定对象 key，可以额外传：
+Optionally provide a custom object key:
 
 ```bash
 curl -fsS -X POST "$ONEFILE_BASE_URL/api/uploads/direct" \
@@ -335,31 +380,31 @@ curl -fsS -X POST "$ONEFILE_BASE_URL/api/uploads/direct" \
   -F "original_filename=image.png"
 ```
 
-响应会返回 `bucket_id`、`bucket_name`、`object_key`、`mime_type`、`compressed` 等信息。使用 API key 调用时，默认使用 key 上配置的 bucket 和压缩策略；大文件请使用 `/api/uploads` 创建 multipart 会话，再逐片 POST 到 `/api/uploads/:id/parts/upload`。更完整的示例请访问应用内 `/api-docs`。
+The response includes fields such as `bucket_id`, `bucket_name`, `object_key`, `mime_type`, and `compressed`. For large files, create a multipart session with `/api/uploads`, upload each part to `/api/uploads/:id/parts/upload`, then complete with `/api/uploads/:id/complete`. See `/api-docs` inside the app for the full API reference.
 
 </details>
 
 <details>
-<summary>展开：本地开发</summary>
+<summary>Local development</summary>
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-开发地址：
+Development URL:
 
 ```text
 http://localhost:27507
 ```
 
-本地 GitHub OAuth App 回调地址：
+Local GitHub OAuth callback URL:
 
 ```text
 http://localhost:27507/callback/auth
 ```
 
-常用命令：
+Common commands:
 
 ```bash
 pnpm build
@@ -369,23 +414,23 @@ pnpm lint
 
 </details>
 
-## 许可证
+## License
 
-本项目使用 [AGPL-3.0-only](./LICENSE) 许可证。
+OneFile is licensed under [AGPL-3.0-only](./LICENSE).
 
-## 致谢
+## Credits
 
-- [Next.js](https://nextjs.org/) - React 全栈框架
-- [shadcn/ui](https://ui.shadcn.com/) - UI 组件体系
-- [Lucide](https://lucide.dev/) - 图标库
-- [TanStack Query](https://tanstack.com/query) - 前端数据请求与缓存
-- [TanStack Table](https://tanstack.com/table) - 表格能力
+- [Next.js](https://nextjs.org/) - React full-stack framework
+- [shadcn/ui](https://ui.shadcn.com/) - UI component system
+- [Lucide](https://lucide.dev/) - Icon library
+- [TanStack Query](https://tanstack.com/query) - Client-side data fetching and caching
+- [TanStack Table](https://tanstack.com/table) - Data table primitives
 - [Drizzle ORM](https://orm.drizzle.team/) - TypeScript ORM
 - [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) - SQLite driver
-- [AWS SDK for JavaScript](https://aws.amazon.com/sdk-for-javascript/) - S3 兼容存储接入
-- [ali-oss](https://github.com/ali-sdk/ali-oss) - 阿里云 OSS SDK
-- [cos-nodejs-sdk-v5](https://github.com/tencentyun/cos-nodejs-sdk-v5) - 腾讯云 COS SDK
+- [AWS SDK for JavaScript](https://aws.amazon.com/sdk-for-javascript/) - S3-compatible storage integration
+- [ali-oss](https://github.com/ali-sdk/ali-oss) - Aliyun OSS SDK
+- [cos-nodejs-sdk-v5](https://github.com/tencentyun/cos-nodejs-sdk-v5) - Tencent COS SDK
 
-## 安全提示
+## Security Notes
 
-OneFile 会保存对象存储访问凭证和 API key 信息。生产部署请妥善保护 `.env`、`/app/data/.onefile-secret` 和 SQLite 数据库，并优先通过 HTTPS 和反向代理对外提供服务。
+OneFile stores object-storage access credentials and API-key metadata. In production, protect `.env`, `/app/data/.onefile-secret`, and the SQLite database. Serve the app over HTTPS through a trusted reverse proxy whenever it is exposed to the internet.
