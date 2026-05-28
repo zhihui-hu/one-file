@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { Trash2 } from 'lucide-react';
 
+import { FilePathText } from './path-text';
 import type { FileDeleteDialogProps, SetRowSelection } from './types';
 
 export function SingleFileDeleteDialog({
@@ -16,17 +17,24 @@ export function SingleFileDeleteDialog({
   deleteTarget: FileItem | null;
   onOpenChange: (open: boolean) => void;
 }) {
+  const deletePath = deleteTarget?.path ?? '';
+
   return (
     <ResponsiveDialog open={Boolean(deleteTarget)} onOpenChange={onOpenChange}>
       <ResponsiveDialog.Content
         className="sm:max-w-md"
         drawerClassName="max-h-[92vh]"
       >
-        <ResponsiveDialog.Header className="p-0 text-left">
+        <ResponsiveDialog.Header className="min-w-0 p-0 text-left">
           <ResponsiveDialog.Title>删除对象</ResponsiveDialog.Title>
           <ResponsiveDialog.Description>
-            将直接从当前 bucket 删除 {deleteTarget?.path}。
+            将直接从当前 bucket 删除以下对象。
           </ResponsiveDialog.Description>
+          {deletePath && (
+            <div className="max-w-full min-w-0 overflow-hidden rounded-md bg-muted px-2 py-1.5 font-mono text-xs leading-relaxed text-foreground">
+              <FilePathText path={deletePath} />
+            </div>
+          )}
         </ResponsiveDialog.Header>
         <ResponsiveDialog.Footer className="p-3">
           <Button

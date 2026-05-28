@@ -49,6 +49,8 @@ import {
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 
+import { FilePathText } from './path-text';
+
 const VIDEO_FILE_EXTENSIONS = [
   '3g2',
   '3gp',
@@ -298,7 +300,9 @@ export function NameCell({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-      <TooltipContent>{item.path || label}</TooltipContent>
+      <TooltipContent>
+        <FilePathText path={item.path || label} />
+      </TooltipContent>
     </Tooltip>
   );
 }
