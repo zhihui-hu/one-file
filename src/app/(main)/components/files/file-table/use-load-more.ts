@@ -16,7 +16,7 @@ export function useFileTableLoadMore({
   itemCount: number;
 }) {
   const scrollRootRef = useRef<HTMLDivElement | null>(null);
-  const loadMoreRef = useRef<HTMLTableRowElement | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const loadMoreRequestedRef = useRef(false);
 
   useEffect(() => {

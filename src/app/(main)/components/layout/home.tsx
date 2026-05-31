@@ -14,6 +14,13 @@ import { StorageAccountDialog } from '@/app/(main)/components/storage/storage-ac
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -90,6 +97,7 @@ export function OneFileHome() {
   const [accountsOpen, setAccountsOpen] = useState(false);
   const [createAccountOpen, setCreateAccountOpen] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
+  const [bucketDrawerOpen, setBucketDrawerOpen] = useState(false);
   const [locationReady, setLocationReady] = useState(false);
   const [selectedBucketId, setSelectedBucketId] = useState<string | null>(null);
   const [bucketPrefixes, setBucketPrefixes] = useState<Record<string, string>>(
@@ -215,13 +223,21 @@ export function OneFileHome() {
     );
   }, []);
 
+  const selectBucketFromList = useCallback(
+    (bucket: (typeof buckets)[number]) => {
+      selectBucket(bucket.id);
+      setBucketDrawerOpen(false);
+    },
+    [selectBucket],
+  );
+
   const refreshBuckets = useCallback(() => {
     void refetchBuckets();
   }, [refetchBuckets]);
 
   if (meQuery.isLoading) {
     return (
-      <main className="flex h-[calc(100vh-7rem)] flex-col gap-3 overflow-hidden p-3">
+      <main className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-3">
         <Skeleton className="h-16 w-full" />
         <Skeleton className="min-h-0 flex-1" />
       </main>
@@ -249,7 +265,7 @@ export function OneFileHome() {
 
   if (loadingBuckets) {
     return (
-      <main className="flex h-[calc(100vh-7rem)] flex-col gap-3 overflow-hidden p-3">
+      <main className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-3">
         <Skeleton className="h-16 w-full" />
         <Skeleton className="min-h-0 flex-1" />
         {storageDialogOpen && (
@@ -266,7 +282,7 @@ export function OneFileHome() {
 
   if (emptyStorage) {
     return (
-      <main className="flex h-[calc(100vh-7rem)] flex-1 items-center justify-center overflow-hidden p-4">
+      <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4">
         <Empty className="max-w-lg border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -324,8 +340,9 @@ export function OneFileHome() {
         </Alert>
       )}
 
-      <div className="grid min-h-0 flex-1 overflow-hidden md:grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="grid min-h-0 flex-1 overflow-hidden lg:grid-cols-[18rem_minmax(0,1fr)]">
         <BucketSidebar
+          className="hidden lg:flex"
           accounts={accounts}
           buckets={buckets}
           selectedBucket={selectedBucket}
@@ -333,15 +350,42 @@ export function OneFileHome() {
           refreshing={bucketsQuery.isFetching}
           onRefresh={refreshBuckets}
           onCreateAccount={() => setCreateAccountOpen(true)}
-          onSelectBucket={(bucket) => selectBucket(bucket.id)}
+          onSelectBucket={selectBucketFromList}
         />
         <FileBrowser
           bucket={selectedBucket}
           prefix={selectedPrefix}
           onPrefixChange={updateSelectedPrefix}
           onOpenAccounts={() => setAccountsOpen(true)}
+          onOpenBuckets={() => setBucketDrawerOpen(true)}
         />
       </div>
+
+      <Drawer open={bucketDrawerOpen} onOpenChange={setBucketDrawerOpen}>
+        <DrawerContent className="h-[85dvh] max-h-[85dvh]">
+          <DrawerHeader className="text-left">
+            <DrawerTitle>选择 bucket</DrawerTitle>
+            <DrawerDescription>
+              {selectedBucket
+                ? selectedBucket.name
+                : '选择一个 bucket 后浏览文件'}
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 px-3 pb-3">
+            <BucketSidebar
+              className="h-full rounded-lg border bg-background"
+              accounts={accounts}
+              buckets={buckets}
+              selectedBucket={selectedBucket}
+              loading={loadingBuckets}
+              refreshing={bucketsQuery.isFetching}
+              onRefresh={refreshBuckets}
+              onCreateAccount={() => setCreateAccountOpen(true)}
+              onSelectBucket={selectBucketFromList}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {storageDialogOpen && (
         <StorageAccountDialog

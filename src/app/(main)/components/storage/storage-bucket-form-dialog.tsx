@@ -76,7 +76,7 @@ export function StorageBucketFormDialog({
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialog.Content
         className="overflow-hidden sm:max-w-md"
-        drawerClassName="max-h-[92vh]"
+        drawerClassName="max-h-[92dvh]"
       >
         <ResponsiveDialog.Header className="min-w-0 p-0 text-left">
           <ResponsiveDialog.Title>编辑 bucket</ResponsiveDialog.Title>

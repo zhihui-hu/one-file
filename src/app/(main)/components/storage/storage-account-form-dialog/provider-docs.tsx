@@ -214,8 +214,8 @@ export function ProviderDocs({ provider }: { provider: ProviderValue }) {
         </Button>
       </ResponsiveDialog.Trigger>
       <ResponsiveDialog.Content
-        className="flex h-[min(90vh,42rem)] max-h-[min(90vh,42rem)] flex-col overflow-hidden sm:max-w-2xl"
-        drawerClassName="h-[88vh] max-h-[88vh]"
+        className="flex h-[min(90dvh,42rem)] max-h-[min(90dvh,42rem)] flex-col overflow-hidden sm:max-w-2xl"
+        drawerClassName="h-[88dvh] max-h-[88dvh]"
       >
         <ResponsiveDialog.Header className="min-w-0 shrink-0 p-0 text-left">
           <ResponsiveDialog.Title>存储账号配置文档</ResponsiveDialog.Title>

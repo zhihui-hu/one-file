@@ -30,7 +30,7 @@ export function QrCodeDialog({
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialog.Content
         className="sm:max-w-sm"
-        drawerClassName="max-h-[92vh]"
+        drawerClassName="max-h-[92dvh]"
       >
         <ResponsiveDialog.Header className="p-0 text-left">
           <ResponsiveDialog.Title>{title}</ResponsiveDialog.Title>

@@ -133,12 +133,10 @@ export function OneFileHeader() {
                     <KeyRound />
                     API KEY
                   </DropdownMenuItem>
-                  {user.role === 'admin' && (
-                    <DropdownMenuItem onSelect={() => setBackupOpen(true)}>
-                      <DatabaseBackup />
-                      导入导出
-                    </DropdownMenuItem>
-                  )}
+                  <DropdownMenuItem onSelect={() => setBackupOpen(true)}>
+                    <DatabaseBackup />
+                    {user.role === 'admin' ? '导入导出' : '导出数据'}
+                  </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -174,7 +172,11 @@ export function OneFileHeader() {
         <ApiKeyDialog open={apiKeysOpen} onOpenChange={setApiKeysOpen} />
       )}
       {backupOpen && (
-        <SqlBackupDialog open={backupOpen} onOpenChange={setBackupOpen} />
+        <SqlBackupDialog
+          open={backupOpen}
+          onOpenChange={setBackupOpen}
+          canImport={user?.role === 'admin'}
+        />
       )}
     </header>
   );

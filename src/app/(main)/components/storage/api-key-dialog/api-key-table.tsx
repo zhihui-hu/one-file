@@ -338,7 +338,7 @@ export function ApiKeyTable({
 
   return (
     <>
-      <div className="max-h-[58vh] overflow-auto rounded-lg border">
+      <div className="min-h-0 flex-1 overflow-auto rounded-lg border">
         <TanStackDataTable table={table} />
       </div>
       <QrCodeDialog

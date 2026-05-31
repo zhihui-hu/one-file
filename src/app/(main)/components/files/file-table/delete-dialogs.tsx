@@ -23,7 +23,7 @@ export function SingleFileDeleteDialog({
     <ResponsiveDialog open={Boolean(deleteTarget)} onOpenChange={onOpenChange}>
       <ResponsiveDialog.Content
         className="sm:max-w-md"
-        drawerClassName="max-h-[92vh]"
+        drawerClassName="max-h-[92dvh]"
       >
         <ResponsiveDialog.Header className="min-w-0 p-0 text-left">
           <ResponsiveDialog.Title>删除对象</ResponsiveDialog.Title>
@@ -81,7 +81,7 @@ export function BulkFileDeleteDialog({
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialog.Content
         className="sm:max-w-md"
-        drawerClassName="max-h-[92vh]"
+        drawerClassName="max-h-[92dvh]"
       >
         <ResponsiveDialog.Header className="p-0 text-left">
           <ResponsiveDialog.Title>批量删除文件</ResponsiveDialog.Title>

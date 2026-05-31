@@ -13,7 +13,7 @@ import { LockKeyhole, LogIn } from 'lucide-react';
 
 export function AuthGate() {
   return (
-    <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center p-4">
+    <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-4">
       <Empty className="max-w-xl border">
         <EmptyHeader>
           <EmptyMedia variant="icon">

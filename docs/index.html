@@ -1,500 +1,572 @@
 <!doctype html>
 <html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="OneFile 是一个自托管、多云对象存储上传网关，支持 GitHub OAuth 登录、API key 上传、公开上传页和 SQL 导入导出。"
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <meta property="og:title" content="OneFile - 自托管对象存储上传工具" />
+    <meta
+      property="og:description"
+      content="接入 OSS、COS、R2、S3、OCI 等对象存储，再通过后台、API key 或公开链接上传。"
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:image"
+      content="https://img.huzhihui.com/uploads/2026/05/pwa-512x512.png"
+    />
+    <title>OneFile - 文档</title>
+    <link
+      rel="icon"
+      href="https://img.huzhihui.com/uploads/2026/05/pwa-512x512.png"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --text: #111827;
+        --muted: #4b5563;
+        --line: #e5e7eb;
+        --link: #2563eb;
+        --bg: #ffffff;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="OneFile 是一个轻量、自托管的对象存储上传和管理工具，支持 S3、R2、B2、OCI、阿里云 OSS 和腾讯云 COS。" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta property="og:title" content="OneFile - 自托管对象存储上传工具" />
-  <meta property="og:description" content="一个统一上传入口，管理多云 bucket、公开上传页和 API key 上传。" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://img.huzhihui.com/uploads/2026/05/pwa-512x512.png" />
-  <title>OneFile - Docs</title>
-  <link rel="icon" href="https://img.huzhihui.com/uploads/2026/05/pwa-512x512.png" />
-  <style>
-    :root {
-      color-scheme: light;
-      --text: #111827;
-      --muted: #4b5563;
-      --line: #e5e7eb;
-      --link: #2563eb;
-      --bg: #ffffff;
-    }
+      * {
+        box-sizing: border-box;
+      }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      max-width: 880px;
-      margin: 0 auto;
-      padding: 24px;
-      background: var(--bg);
-      color: var(--text);
-      font-family:
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        'Segoe UI',
-        sans-serif;
-      line-height: 1.7;
-    }
-
-    header,
-    footer,
-    section {
-      padding: 24px 0;
-      border-bottom: 1px solid var(--line);
-    }
-
-    header,
-    footer,
-    nav,
-    .actions,
-    .providers {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px 18px;
-      align-items: center;
-    }
-
-    header {
-      justify-content: space-between;
-      padding-top: 0;
-    }
-
-    footer {
-      border-bottom: 0;
-      color: var(--muted);
-    }
-
-    a {
-      color: var(--link);
-      text-decoration-thickness: 1px;
-      text-underline-offset: 3px;
-    }
-
-    button,
-    .button {
-      display: inline-flex;
-      min-height: 40px;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--bg);
-      color: var(--text);
-      cursor: pointer;
-      font: inherit;
-      padding: 0 14px;
-      text-decoration: none;
-    }
-
-    .primary {
-      border-color: var(--link);
-      background: var(--link);
-      color: #ffffff;
-    }
-
-    h1 {
-      max-width: 11ch;
-      margin: 32px 0 16px;
-      font-size: clamp(40px, 8vw, 72px);
-      line-height: 1;
-    }
-
-    h1 span {
-      display: block;
-    }
-
-    h2 {
-      margin: 0 0 12px;
-      font-size: 28px;
-      line-height: 1.2;
-    }
-
-    h3,
-    p,
-    ul,
-    pre {
-      margin: 12px 0 0;
-    }
-
-    h1,
-    h2,
-    p,
-    span,
-    strong {
-      overflow-wrap: anywhere;
-    }
-
-    p,
-    li {
-      color: var(--muted);
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text);
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .brand img {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-    }
-
-    .lede {
-      max-width: 620px;
-      font-size: 20px;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 180px 1fr;
-      gap: 12px;
-      padding: 12px 0;
-      border-top: 1px solid var(--line);
-    }
-
-    .row strong {
-      color: var(--text);
-    }
-
-    .providers span,
-    code {
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 2px 6px;
-    }
-
-    .providers span {
-      flex: 0 0 auto;
-      white-space: nowrap;
-    }
-
-    pre {
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 16px;
-    }
-
-    pre code {
-      border: 0;
-      padding: 0;
-    }
-
-    :focus-visible {
-      outline: 3px solid #8b5cf6;
-      outline-offset: 3px;
-    }
-
-    @media (max-width: 640px) {
       body {
-        padding: 16px;
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        line-height: 1.7;
       }
 
-      h1 {
-        max-width: 8ch;
-        font-size: 32px;
-        line-height: 1.08;
+      header,
+      footer,
+      section {
+        padding: 24px 0;
+        border-bottom: 1px solid var(--line);
       }
 
-      .lede {
-        font-size: 18px;
+      header,
+      footer,
+      nav,
+      .actions,
+      .providers {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 18px;
+        align-items: center;
       }
 
       header {
-        align-items: flex-start;
+        justify-content: space-between;
+        padding-top: 0;
       }
 
-      nav {
-        width: 100%;
-        max-width: 100%;
+      footer {
+        border-bottom: 0;
+        color: var(--muted);
+      }
+
+      a {
+        color: var(--link);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      button,
+      .button {
+        display: inline-flex;
+        min-height: 40px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--bg);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        padding: 0 14px;
+        text-decoration: none;
+      }
+
+      .primary {
+        border-color: var(--link);
+        background: var(--link);
+        color: #ffffff;
+      }
+
+      h1 {
+        max-width: 11ch;
+        margin: 32px 0 16px;
+        font-size: clamp(40px, 8vw, 72px);
+        line-height: 1;
+      }
+
+      h1 span {
+        display: block;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 28px;
+        line-height: 1.2;
+      }
+
+      h3,
+      p,
+      ul,
+      pre {
+        margin: 12px 0 0;
+      }
+
+      h1,
+      h2,
+      p,
+      span,
+      strong {
+        overflow-wrap: anywhere;
+      }
+
+      p,
+      li {
+        color: var(--muted);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .brand img {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+      }
+
+      .lede {
+        max-width: 620px;
+        font-size: 20px;
       }
 
       .row {
-        grid-template-columns: 1fr;
-        gap: 4px;
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 12px;
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
       }
-    }
-  </style>
-</head>
 
-<body>
-  <header>
-    <a class="brand" href="#top" aria-label="OneFile">
-      <img src="https://img.huzhihui.com/uploads/2026/05/pwa-512x512.png" alt="" width="512" height="512"
-        decoding="async" />
-      <span>OneFile</span>
-    </a>
-    <nav aria-label="Main navigation">
-      <a href="#features" data-i18n="nav.features">功能</a>
-      <a href="#deploy" data-i18n="nav.deploy">部署</a>
-      <a href="#api" data-i18n="nav.api">API</a>
-      <a href="https://github.com/zhihui-hu/onefile#readme">GitHub</a>
-      <button type="button" data-lang-toggle>EN</button>
-    </nav>
-  </header>
+      .row strong {
+        color: var(--text);
+      }
 
-  <main id="top">
-    <section aria-labelledby="hero-title">
-      <p data-i18n="hero.eyebrow">自托管对象存储上传工具</p>
-      <h2 id="hero-title" data-i18n="hero.title">
-        <span>一个入口，</span><span>上传到所有 bucket。</span>
-      </h2>
-      <p class="lede" data-i18n="hero.copy">
-        OneFile 把 S3、R2、B2、OCI、阿里云 OSS、腾讯云 COS
-        聚合成统一的网页后台、公开上传页和 API key 上传服务。
-      </p>
-      <p class="actions">
-        <a class="button primary" href="https://onefile.huzhihui.com" data-i18n="hero.demo">在线预览</a>
-        <a class="button" href="#deploy" data-i18n="hero.start">快速开始</a>
-      </p>
-      <p class="providers" aria-label="Supported providers">
-        <span>AWS S3</span>
-        <span>Cloudflare R2</span>
-        <span>Backblaze B2</span>
-        <span>Oracle OCI</span>
-        <span>Aliyun OSS</span>
-        <span>Tencent COS</span>
-      </p>
-    </section>
+      .providers span,
+      code {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 2px 6px;
+      }
 
-    <section id="features" aria-labelledby="features-title">
-      <h2 id="features-title" data-i18n="features.title">核心能力</h2>
-      <div class="row">
-        <strong data-i18n="features.storage.title">多云管理</strong>
-        <span data-i18n="features.storage.copy">维护存储账号、bucket、公开访问地址和 provider 特有配置。</span>
-      </div>
-      <div class="row">
-        <strong data-i18n="features.browser.title">文件后台</strong>
-        <span data-i18n="features.browser.copy">上传、浏览目录、搜索、预览图片、复制链接和删除对象。</span>
-      </div>
-      <div class="row">
-        <strong data-i18n="features.api.title">API key 上传</strong>
-        <span data-i18n="features.api.copy">给 Markdown 编辑器、脚本、CI 和第三方系统提供统一上传入口。</span>
-      </div>
-      <div class="row">
-        <strong data-i18n="features.public.title">公开上传页</strong>
-        <span data-i18n="features.public.copy">通过 UUID 页面和二维码分享上传入口，不暴露后台账号。</span>
-      </div>
-      <div class="row">
-        <strong data-i18n="features.backup.title">备份迁移</strong>
-        <span data-i18n="features.backup.copy">导入导出 SQL 备份，并保留解密迁移凭证所需的密钥信息。</span>
-      </div>
-    </section>
+      .providers span {
+        flex: 0 0 auto;
+        white-space: nowrap;
+      }
 
-    <section id="deploy" aria-labelledby="deploy-title">
-      <h2 id="deploy-title" data-i18n="deploy.title">几分钟跑起来</h2>
-      <p data-i18n="deploy.copy">
-        创建 GitHub OAuth App，把 callback 指向
-        <code>/callback/auth</code>，然后运行 GHCR 镜像。
-      </p>
-      <pre><code>docker run -d --name onefile --restart unless-stopped \
+      pre {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      pre code {
+        border: 0;
+        padding: 0;
+      }
+
+      :focus-visible {
+        outline: 3px solid #8b5cf6;
+        outline-offset: 3px;
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 16px;
+        }
+
+        h1 {
+          max-width: 8ch;
+          font-size: 32px;
+          line-height: 1.08;
+        }
+
+        .lede {
+          font-size: 18px;
+        }
+
+        header {
+          align-items: flex-start;
+        }
+
+        nav {
+          width: 100%;
+          max-width: 100%;
+        }
+
+        .row {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <a class="brand" href="#top" aria-label="OneFile">
+        <img
+          src="https://img.huzhihui.com/uploads/2026/05/pwa-512x512.png"
+          alt=""
+          width="512"
+          height="512"
+          decoding="async"
+        />
+        <span>OneFile</span>
+      </a>
+      <nav aria-label="主导航">
+        <a href="#features" data-i18n="nav.features">功能</a>
+        <a href="#deploy" data-i18n="nav.deploy">部署</a>
+        <a href="#api" data-i18n="nav.api">API</a>
+        <a href="https://github.com/zhihui-hu/onefile#readme">GitHub</a>
+        <button type="button" data-lang-toggle>EN</button>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section aria-labelledby="hero-title">
+        <p data-i18n="hero.eyebrow">自托管对象存储上传工具</p>
+        <h2 id="hero-title" data-i18n="hero.title">
+          <span>一个入口，</span><span>上传到所有 bucket。</span>
+        </h2>
+        <p class="lede" data-i18n="hero.copy">
+          OneFile 把 S3、R2、B2、OCI、阿里云 OSS、腾讯云 COS
+          聚合成一个自托管上传入口：自己登录后台管理，工具走 API
+          key，朋友走公开上传链接。
+        </p>
+        <p class="actions">
+          <a
+            class="button primary"
+            href="https://onefile.huzhihui.com"
+            data-i18n="hero.demo"
+            >在线预览</a
+          >
+          <a class="button" href="#deploy" data-i18n="hero.start">快速开始</a>
+        </p>
+        <p class="providers" aria-label="Supported providers">
+          <span>AWS S3</span>
+          <span>Cloudflare R2</span>
+          <span>Backblaze B2</span>
+          <span>Oracle OCI</span>
+          <span>Aliyun OSS</span>
+          <span>Tencent COS</span>
+        </p>
+      </section>
+
+      <section id="features" aria-labelledby="features-title">
+        <h2 id="features-title" data-i18n="features.title">核心能力</h2>
+        <div class="row">
+          <strong data-i18n="features.login.title">GitHub OAuth 登录</strong>
+          <span data-i18n="features.login.copy"
+            >部署前准备 GitHub OAuth App，用于管理员登录后台。</span
+          >
+        </div>
+        <div class="row">
+          <strong data-i18n="features.storage.title">多云管理</strong>
+          <span data-i18n="features.storage.copy"
+            >维护存储账号、bucket、公开访问地址和 provider 特有配置。</span
+          >
+        </div>
+        <div class="row">
+          <strong data-i18n="features.browser.title">文件后台</strong>
+          <span data-i18n="features.browser.copy"
+            >上传、浏览目录、搜索、预览图片、复制链接和删除对象。</span
+          >
+        </div>
+        <div class="row">
+          <strong data-i18n="features.api.title">API key 上传</strong>
+          <span data-i18n="features.api.copy"
+            >给 Markdown 编辑器、脚本、CI 和第三方系统提供统一上传入口。</span
+          >
+        </div>
+        <div class="row">
+          <strong data-i18n="features.public.title">公开上传页</strong>
+          <span data-i18n="features.public.copy"
+            >复制 UUID 链接或二维码发给朋友，对方无需登录即可上传。</span
+          >
+        </div>
+        <div class="row">
+          <strong data-i18n="features.large.title">大文件上传</strong>
+          <span data-i18n="features.large.copy"
+            >超过 100 MiB 的网页上传使用 multipart
+            分片流程，队列支持暂停和重试。</span
+          >
+        </div>
+        <div class="row">
+          <strong data-i18n="features.backup.title">备份迁移</strong>
+          <span data-i18n="features.backup.copy"
+            >后台导入导出 SQL 备份，并同步迁移后解密凭证所需的应用密钥。</span
+          >
+        </div>
+      </section>
+
+      <section id="deploy" aria-labelledby="deploy-title">
+        <h2 id="deploy-title" data-i18n="deploy.title">几分钟跑起来</h2>
+        <p data-i18n="deploy.copy">
+          先创建 GitHub OAuth App，把 callback 填成
+          <code>https://你的域名/callback/auth</code
+          >。对象存储凭证启动后在后台添加。
+        </p>
+        <pre><code>docker run -d --name onefile --restart unless-stopped \
   -p 27507:27507 \
   -e GITHUB_CLIENT_ID=your_github_client_id \
   -e GITHUB_CLIENT_SECRET=your_github_client_secret \
   -v onefile-data:/app/data \
   ghcr.io/zhihui-hu/onefile:latest</code></pre>
-      <p data-i18n="deploy.note">
-        请保留 onefile-data volume。它包含 SQLite
-        数据库和用于加密存储凭证的应用密钥。
-      </p>
-    </section>
+        <p data-i18n="deploy.after">
+          启动后打开 http://服务器IP:27507，用 GitHub 登录，添加存储账号并同步
+          bucket。创建 API key 后，可以复制 token
+          接入工具，也可以复制公开上传链接发给朋友。
+        </p>
+        <p data-i18n="deploy.note">
+          请保留 onefile-data volume。它包含 SQLite
+          数据库和用于加密存储凭证的应用密钥。后台支持 SQL
+          导入导出，迁移时请保留原始导出文件名。
+        </p>
+      </section>
 
-    <section id="api" aria-labelledby="api-title">
-      <h2 id="api-title" data-i18n="api.title">
-        外部工具只需要一个 bearer token
-      </h2>
-      <p data-i18n="api.copy">
-        应用内 <code>/api-docs</code> 页面包含完整 API
-        文档。最小直接上传请求如下：
-      </p>
-      <pre><code>curl -fsS -X POST "$ONEFILE_BASE_URL/api/uploads/direct" \
+      <section id="api" aria-labelledby="api-title">
+        <h2 id="api-title" data-i18n="api.title">
+          外部工具用 API key，朋友用公开链接
+        </h2>
+        <p data-i18n="api.copy">
+          程序接入时使用 bearer
+          token；只想让别人上传时，直接分享公开上传页。应用内
+          <code>/api-docs</code> 页面包含完整 API 文档。
+        </p>
+        <pre><code>curl -fsS -X POST "$ONEFILE_BASE_URL/api/uploads/direct" \
   -H "Authorization: Bearer $ONEFILE_API_KEY" \
   -F "file=@./image.png"</code></pre>
-    </section>
+      </section>
 
-    <section aria-labelledby="architecture-title">
-      <h2 id="architecture-title" data-i18n="architecture.title">项目结构</h2>
-      <div class="row">
-        <strong>src/app/api/**/route.ts</strong>
-        <span data-i18n="architecture.api">Node.js 后端接口</span>
-      </div>
-      <div class="row">
-        <strong>src/app/(main)/components</strong>
-        <span data-i18n="architecture.console">登录后的文件管理后台</span>
-      </div>
-      <div class="row">
-        <strong>src/app/[uuid]</strong>
-        <span data-i18n="architecture.public">公开上传页面路由</span>
-      </div>
-      <div class="row">
-        <strong>src/lib/db</strong>
-        <span data-i18n="architecture.db">SQLite、Drizzle schema 和备份工具</span>
-      </div>
-      <div class="row">
-        <strong>src/lib/storage</strong>
-        <span data-i18n="architecture.storage">多云 provider adapter</span>
-      </div>
-    </section>
-  </main>
+      <section aria-labelledby="architecture-title">
+        <h2 id="architecture-title" data-i18n="architecture.title">项目结构</h2>
+        <div class="row">
+          <strong>src/app/api/**/route.ts</strong>
+          <span data-i18n="architecture.api">Node.js 后端接口</span>
+        </div>
+        <div class="row">
+          <strong>src/app/(main)/components</strong>
+          <span data-i18n="architecture.console">登录后的文件管理后台</span>
+        </div>
+        <div class="row">
+          <strong>src/app/[uuid]</strong>
+          <span data-i18n="architecture.public">公开上传页面路由</span>
+        </div>
+        <div class="row">
+          <strong>src/lib/db</strong>
+          <span data-i18n="architecture.db"
+            >SQLite、Drizzle schema 和备份工具</span
+          >
+        </div>
+        <div class="row">
+          <strong>src/lib/storage</strong>
+          <span data-i18n="architecture.storage">多云 provider adapter</span>
+        </div>
+      </section>
+    </main>
 
-  <footer>
-    <span>OneFile</span>
-    <a href="https://github.com/zhihui-hu/onefile">GitHub</a>
-    <a href="https://github.com/zhihui-hu/onefile/blob/main/LICENSE">AGPL-3.0-only</a>
-  </footer>
+    <footer>
+      <span>OneFile</span>
+      <a href="https://github.com/zhihui-hu/onefile">GitHub</a>
+      <a href="https://github.com/zhihui-hu/onefile/blob/main/LICENSE"
+        >AGPL-3.0-only</a
+      >
+    </footer>
 
-  <script>
-    const copy = {
-      zh: {
-        nav: { features: '功能', deploy: '部署', api: 'API' },
-        hero: {
-          eyebrow: '自托管对象存储上传工具',
-          title: '<span>一个入口，</span><span>上传到所有 bucket。</span>',
-          copy: 'OneFile 把 S3、R2、B2、OCI、阿里云 OSS、腾讯云 COS 聚合成统一的网页后台、公开上传页和 API key 上传服务。',
-          demo: '在线预览',
-          start: '快速开始',
-        },
-        features: {
-          title: '核心能力',
-          storage: {
-            title: '多云管理',
-            copy: '维护存储账号、bucket、公开访问地址和 provider 特有配置。',
+    <script>
+      const copy = {
+        zh: {
+          nav: { features: '功能', deploy: '部署', api: 'API' },
+          hero: {
+            eyebrow: '自托管对象存储上传工具',
+            title: '<span>一个入口，</span><span>上传到所有 bucket。</span>',
+            copy: 'OneFile 把 S3、R2、B2、OCI、阿里云 OSS、腾讯云 COS 聚合成一个自托管上传入口：自己登录后台管理，工具走 API key，朋友走公开上传链接。',
+            demo: '在线预览',
+            start: '快速开始',
           },
-          browser: {
-            title: '文件后台',
-            copy: '上传、浏览目录、搜索、预览图片、复制链接和删除对象。',
+          features: {
+            title: '核心能力',
+            login: {
+              title: 'GitHub OAuth 登录',
+              copy: '部署前准备 GitHub OAuth App，用于管理员登录后台。',
+            },
+            storage: {
+              title: '多云管理',
+              copy: '维护存储账号、bucket、公开访问地址和 provider 特有配置。',
+            },
+            browser: {
+              title: '文件后台',
+              copy: '上传、浏览目录、搜索、预览图片、复制链接和删除对象。',
+            },
+            api: {
+              title: 'API key 上传',
+              copy: '给 Markdown 编辑器、脚本、CI 和第三方系统提供统一上传入口。',
+            },
+            public: {
+              title: '公开上传页',
+              copy: '复制 UUID 链接或二维码发给朋友，对方无需登录即可上传。',
+            },
+            large: {
+              title: '大文件上传',
+              copy: '超过 100 MiB 的网页上传使用 multipart 分片流程，队列支持暂停和重试。',
+            },
+            backup: {
+              title: '备份迁移',
+              copy: '后台导入导出 SQL 备份，并同步迁移后解密凭证所需的应用密钥。',
+            },
+          },
+          deploy: {
+            title: '几分钟跑起来',
+            copy: '先创建 GitHub OAuth App，把 callback 填成 https://你的域名/callback/auth。对象存储凭证启动后在后台添加。',
+            after:
+              '启动后打开 http://服务器IP:27507，用 GitHub 登录，添加存储账号并同步 bucket。创建 API key 后，可以复制 token 接入工具，也可以复制公开上传链接发给朋友。',
+            note: '请保留 onefile-data volume。它包含 SQLite 数据库和用于加密存储凭证的应用密钥。后台支持 SQL 导入导出，迁移时请保留原始导出文件名。',
           },
           api: {
-            title: 'API key 上传',
-            copy: '给 Markdown 编辑器、脚本、CI 和第三方系统提供统一上传入口。',
+            title: '外部工具用 API key，朋友用公开链接',
+            copy: '程序接入时使用 bearer token；只想让别人上传时，直接分享公开上传页。应用内 /api-docs 页面包含完整 API 文档。',
           },
-          public: {
-            title: '公开上传页',
-            copy: '通过 UUID 页面和二维码分享上传入口，不暴露后台账号。',
+          architecture: {
+            title: '项目结构',
+            api: 'Node.js 后端接口',
+            console: '登录后的文件管理后台',
+            public: '公开上传页面路由',
+            db: 'SQLite、Drizzle schema 和备份工具',
+            storage: '多云 provider adapter',
           },
-          backup: {
-            title: '备份迁移',
-            copy: '导入导出 SQL 备份，并保留解密迁移凭证所需的密钥信息。',
+        },
+        en: {
+          nav: { features: 'Features', deploy: 'Deploy', api: 'API' },
+          hero: {
+            eyebrow: 'Self-hosted object storage uploads',
+            title: '<span>One gateway</span><span>for every bucket.</span>',
+            copy: 'OneFile turns S3, R2, B2, OCI, Aliyun OSS, and Tencent COS into one self-hosted upload gateway: you manage the console, tools use API keys, and friends use public upload links.',
+            demo: 'Live Demo',
+            start: 'Quick Start',
           },
-        },
-        deploy: {
-          title: '几分钟跑起来',
-          copy: '创建 GitHub OAuth App，把 callback 指向 /callback/auth，然后运行 GHCR 镜像。',
-          note: '请保留 onefile-data volume。它包含 SQLite 数据库和用于加密存储凭证的应用密钥。',
-        },
-        api: {
-          title: '外部工具只需要一个 bearer token',
-          copy: '应用内 /api-docs 页面包含完整 API 文档。最小直接上传请求如下：',
-        },
-        architecture: {
-          title: '项目结构',
-          api: 'Node.js 后端接口',
-          console: '登录后的文件管理后台',
-          public: '公开上传页面路由',
-          db: 'SQLite、Drizzle schema 和备份工具',
-          storage: '多云 provider adapter',
-        },
-      },
-      en: {
-        nav: { features: 'Features', deploy: 'Deploy', api: 'API' },
-        hero: {
-          eyebrow: 'Self-hosted object storage uploads',
-          title: '<span>One gateway</span><span>for every bucket.</span>',
-          copy: 'OneFile turns S3, R2, B2, OCI, Aliyun OSS, and Tencent COS into a single console, public upload page system, and API-key upload service.',
-          demo: 'Live Demo',
-          start: 'Quick Start',
-        },
-        features: {
-          title: 'Core features',
-          storage: {
-            title: 'Multi-cloud management',
-            copy: 'Manage accounts, buckets, public base URLs, and provider-specific settings.',
+          features: {
+            title: 'Core features',
+            login: {
+              title: 'GitHub OAuth login',
+              copy: 'Prepare a GitHub OAuth App before deployment. It is used for administrator sign-in.',
+            },
+            storage: {
+              title: 'Multi-cloud management',
+              copy: 'Manage accounts, buckets, public base URLs, and provider-specific settings.',
+            },
+            browser: {
+              title: 'File console',
+              copy: 'Upload, browse folders, search, preview images, copy links, and delete objects.',
+            },
+            api: {
+              title: 'API-key uploads',
+              copy: 'Give editors, scripts, CI jobs, and third-party tools one upload endpoint.',
+            },
+            public: {
+              title: 'Public upload pages',
+              copy: 'Share a UUID link or QR code so friends can upload without signing in.',
+            },
+            large: {
+              title: 'Large-file uploads',
+              copy: 'Browser uploads over 100 MiB use multipart upload; the queue supports pause and retry.',
+            },
+            backup: {
+              title: 'Backup and migration',
+              copy: 'Export and import SQL backups from the console, including the app secret needed after migration.',
+            },
           },
-          browser: {
-            title: 'File console',
-            copy: 'Upload, browse folders, search, preview images, copy links, and delete objects.',
+          deploy: {
+            title: 'Run it in minutes',
+            copy: 'Create a GitHub OAuth App first and set the callback to https://your-domain/callback/auth. Add object-storage credentials in the console after startup.',
+            after:
+              'After startup, open http://server-ip:27507, sign in with GitHub, add a storage account, and sync buckets. Create an API key to copy a token for tools or a public upload link for friends.',
+            note: 'Keep the onefile-data volume. It contains the SQLite database and the app secret for encrypted storage credentials. The console supports SQL import/export; keep the original exported filename when migrating.',
           },
           api: {
-            title: 'API-key uploads',
-            copy: 'Give editors, scripts, CI jobs, and third-party tools one upload endpoint.',
+            title: 'Tools use API keys; friends use public links',
+            copy: 'Use a bearer token for programmatic integrations. Share a public upload page when someone only needs browser upload access. The in-app /api-docs page has the full API reference.',
           },
-          public: {
-            title: 'Public upload pages',
-            copy: 'Share a UUID page and QR code without exposing admin access.',
+          architecture: {
+            title: 'Project map',
+            api: 'Node.js backend endpoints',
+            console: 'Signed-in file management console',
+            public: 'Public upload page routes',
+            db: 'SQLite, Drizzle schema, and backup helpers',
+            storage: 'Multi-cloud provider adapters',
           },
-          backup: {
-            title: 'Backup and migration',
-            copy: 'Export and import SQL backups with the secrets needed to decrypt migrated credentials.',
-          },
         },
-        deploy: {
-          title: 'Run it in minutes',
-          copy: 'Create a GitHub OAuth App, point the callback to /callback/auth, then run the GHCR image.',
-          note: 'Keep the onefile-data volume. It contains the SQLite database and the application secret for encrypted storage credentials.',
-        },
-        api: {
-          title: 'External tools need one bearer token',
-          copy: 'The in-app /api-docs page has the full API reference. A minimal direct upload request looks like this:',
-        },
-        architecture: {
-          title: 'Project map',
-          api: 'Node.js backend endpoints',
-          console: 'Signed-in file management console',
-          public: 'Public upload page routes',
-          db: 'SQLite, Drizzle schema, and backup helpers',
-          storage: 'Multi-cloud provider adapters',
-        },
-      },
-    };
+      };
 
-    let lang =
-      localStorage.getItem('onefile-docs-lang') ||
-      ((navigator.language || '').toLowerCase().startsWith('zh')
-        ? 'zh'
-        : 'en');
+      let lang = localStorage.getItem('onefile-docs-lang') || 'zh';
 
-    function t(path) {
-      return path
-        .split('.')
-        .reduce((value, key) => value && value[key], copy[lang]);
-    }
+      function t(path) {
+        return path
+          .split('.')
+          .reduce((value, key) => value && value[key], copy[lang]);
+      }
 
-    function render() {
-      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-      document.title = lang === 'zh' ? 'OneFile - 文档' : 'OneFile - Docs';
-      document.querySelector('[data-lang-toggle]').textContent =
-        lang === 'zh' ? 'EN' : '中文';
-      document.querySelectorAll('[data-i18n]').forEach((node) => {
-        const value = t(node.dataset.i18n);
-        if (!value) return;
-        if (node.id === 'hero-title') {
-          node.innerHTML = value;
-          return;
-        }
-        node.textContent = value;
-      });
-    }
+      function render() {
+        document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+        document.title = lang === 'zh' ? 'OneFile - 文档' : 'OneFile - Docs';
+        document.querySelector('[data-lang-toggle]').textContent =
+          lang === 'zh' ? 'EN' : '中文';
+        document.querySelectorAll('[data-i18n]').forEach((node) => {
+          const value = t(node.dataset.i18n);
+          if (!value) return;
+          if (node.id === 'hero-title') {
+            node.innerHTML = value;
+            return;
+          }
+          node.textContent = value;
+        });
+      }
 
-    document
-      .querySelector('[data-lang-toggle]')
-      .addEventListener('click', () => {
-        lang = lang === 'zh' ? 'en' : 'zh';
-        localStorage.setItem('onefile-docs-lang', lang);
-        render();
-      });
+      document
+        .querySelector('[data-lang-toggle]')
+        .addEventListener('click', () => {
+          lang = lang === 'zh' ? 'en' : 'zh';
+          localStorage.setItem('onefile-docs-lang', lang);
+          render();
+        });
 
-    render();
-  </script>
-</body>
-
+      render();
+    </script>
+  </body>
 </html>

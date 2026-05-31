@@ -1,6 +1,6 @@
 import { Providers } from '@/components/providers';
 import { siteConfig } from '@/config/site';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist } from 'next/font/google';
 
 import './globals.css';
@@ -35,6 +35,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.og.url),
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FFFFFF' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -45,10 +54,6 @@ export default function RootLayout({
       <head>
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="renderer" content="webkit" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-        />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link
           rel="icon"
@@ -63,16 +68,6 @@ export default function RootLayout({
           sizes="16x16"
         />
         <link rel="manifest" href="/site.webmanifest" />
-        <meta
-          name="theme-color"
-          content="#FFFFFF"
-          media="(prefers-color-scheme: light)"
-        />
-        <meta
-          name="theme-color"
-          content="#000000"
-          media="(prefers-color-scheme: dark)"
-        />
         {jsonLd && (
           <script
             id="onefile-jsonld"

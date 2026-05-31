@@ -284,13 +284,15 @@ export function NameCell({
       <Button
         type="button"
         variant="ghost"
-        className="h-8 max-w-96 justify-start px-1"
+        className="h-8 max-w-full min-w-0 justify-start px-1"
         onClick={() => onOpenFolder(item)}
       >
         {content}
       </Button>
     ) : (
-      <div className="flex h-8 max-w-96 items-center px-1">{content}</div>
+      <div className="flex h-8 max-w-full min-w-0 items-center px-1">
+        {content}
+      </div>
     );
 
   if (!isOverflowing) {
@@ -444,11 +446,11 @@ export function DirectoryContextMenuContent({
 }
 
 export function tableColumnClass(id: string) {
-  if (id === 'select') return 'w-5 text-center';
-  if (id === 'name') return 'w-96';
-  if (id === 'kind') return 'w-24';
+  if (id === 'select') return 'w-8 text-center';
+  if (id === 'name') return 'w-72 xl:w-96';
+  if (id === 'kind') return 'w-20';
   if (id === 'size') return 'w-24 text-right';
-  if (id === 'updated_at') return 'w-40';
+  if (id === 'updated_at') return 'w-36 xl:w-40';
   if (id === 'actions') return 'w-10 text-right';
   return undefined;
 }

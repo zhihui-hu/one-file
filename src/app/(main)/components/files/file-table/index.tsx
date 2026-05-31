@@ -3,12 +3,21 @@
 import {
   DirectoryContextMenuContent,
   FileContextMenuContent,
+  FileDropdownMenu,
+  NameCell,
   publicObjectUrl,
   tableColumnClass,
 } from '@/app/(main)/components/files/file-table/parts';
 import { FileTableSkeleton } from '@/app/(main)/components/files/file-table/skeleton';
+import {
+  absoluteDate,
+  formatBytes,
+  formatDate,
+} from '@/app/(main)/components/format';
 import type { FileItem, StorageBucket } from '@/app/(main)/components/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import {
   Empty,
@@ -54,6 +63,10 @@ type FileTableProps = {
   onOpenFolder: (item: FileItem) => void;
   onDeleteFiles: (items: FileItem[]) => void;
 };
+
+function fileTypeLabel(item: FileItem) {
+  return item.kind === 'folder' ? '目录' : '文件';
+}
 
 export function FileTable({
   bucket,
@@ -142,7 +155,6 @@ export function FileTable({
     .getSelectedRowModel()
     .rows.map((row) => row.original)
     .filter((item) => item.kind === 'file');
-  const visibleColumnCount = table.getVisibleFlatColumns().length;
   const directoryMenuEnabled =
     selectedFiles.length === 0 && Boolean(onRefresh || onCreateFolder);
 
@@ -195,35 +207,37 @@ export function FileTable({
   return (
     <TooltipProvider>
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-        <table className="min-w-[840px] w-full table-fixed text-xs sm:text-sm shrink-0">
-          <thead className="[&_th]:bg-background">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b">
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className={cn(
-                      'h-8 px-2 py-1 text-left align-middle font-medium text-foreground whitespace-nowrap',
-                      tableColumnClass(header.column.id),
-                    )}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-        </table>
+        <div className="hidden shrink-0 lg:block">
+          <table className="min-w-[680px] w-full table-fixed text-sm">
+            <thead className="[&_th]:bg-background">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id} className="border-b">
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className={cn(
+                        'h-8 px-2 py-1 text-left align-middle font-medium whitespace-nowrap text-foreground',
+                        tableColumnClass(header.column.id),
+                      )}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+          </table>
+        </div>
         <div
           ref={scrollRootRef}
           className="flex min-h-0 flex-1 flex-col overflow-y-auto"
         >
-          <table className="min-w-[840px] w-full shrink-0 table-fixed text-xs sm:text-sm">
+          <table className="hidden min-w-[680px] w-full shrink-0 table-fixed text-sm lg:table">
             <tbody className="[&_tr:last-child]:border-0">
               {table.getRowModel().rows.map((row) => {
                 const item = row.original;
@@ -269,23 +283,95 @@ export function FileTable({
                   </ContextMenu>
                 );
               })}
-              {(hasMore || loadingMore) && (
-                <tr ref={loadMoreRef} className="h-8">
-                  <td
-                    colSpan={visibleColumnCount}
-                    className="h-8 px-2 py-2 text-center text-muted-foreground"
-                  >
-                    {loadingMore ? (
-                      <span className="inline-flex items-center gap-2 text-xs">
-                        <Spinner />
-                        加载中
-                      </span>
-                    ) : null}
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
+
+          <div className="flex flex-col gap-2 p-2 lg:hidden">
+            {table.getRowModel().rows.map((row) => {
+              const item = row.original;
+              const publicUrl = publicObjectUrl(bucket, item);
+
+              return (
+                <ContextMenu key={row.id}>
+                  <ContextMenuTrigger asChild>
+                    <div
+                      className={cn(
+                        'min-w-0 overflow-hidden rounded-lg border bg-card p-2.5 text-card-foreground transition-colors',
+                        row.getIsSelected() && 'bg-muted/50',
+                      )}
+                    >
+                      <div className="flex min-w-0 items-start gap-2">
+                        {row.getCanSelect() ? (
+                          <Checkbox
+                            className="mt-1"
+                            aria-label={`选择 ${item.name || item.path}`}
+                            checked={row.getIsSelected()}
+                            disabled={!row.getCanSelect()}
+                            onCheckedChange={(value) =>
+                              row.toggleSelected(Boolean(value))
+                            }
+                          />
+                        ) : (
+                          <span className="mt-1 size-4 shrink-0" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <NameCell
+                            item={item}
+                            previewUrl={publicUrl}
+                            onOpenFolder={onOpenFolder}
+                          />
+                          <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2 px-1 text-xs text-muted-foreground">
+                            <Badge variant="outline">
+                              {fileTypeLabel(item)}
+                            </Badge>
+                            {item.kind === 'file' && (
+                              <span>{formatBytes(item.size)}</span>
+                            )}
+                            <span
+                              className="min-w-0 truncate"
+                              title={absoluteDate(item.updated_at)}
+                            >
+                              {formatDate(item.updated_at)}
+                            </span>
+                          </div>
+                        </div>
+                        <FileDropdownMenu
+                          item={item}
+                          publicUrl={publicUrl}
+                          deleting={deleting}
+                          onOpen={() => openItem(item, publicUrl)}
+                          onCopy={() => void copyLink(publicUrl)}
+                          onRequestDelete={() => setDeleteTarget(item)}
+                        />
+                      </div>
+                    </div>
+                  </ContextMenuTrigger>
+                  <FileContextMenuContent
+                    item={item}
+                    publicUrl={publicUrl}
+                    deleting={deleting}
+                    onOpen={() => openItem(item, publicUrl)}
+                    onCopy={() => void copyLink(publicUrl)}
+                    onRequestDelete={() => setDeleteTarget(item)}
+                  />
+                </ContextMenu>
+              );
+            })}
+          </div>
+
+          {(hasMore || loadingMore) && (
+            <div
+              ref={loadMoreRef}
+              className="flex h-10 shrink-0 items-center justify-center px-2 py-2 text-center text-muted-foreground"
+            >
+              {loadingMore ? (
+                <span className="inline-flex items-center gap-2 text-xs">
+                  <Spinner />
+                  加载中
+                </span>
+              ) : null}
+            </div>
+          )}
           {directoryMenuEnabled && (
             <ContextMenu>
               <ContextMenuTrigger asChild>

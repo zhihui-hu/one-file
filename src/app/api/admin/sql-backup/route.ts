@@ -1,5 +1,6 @@
 import { HttpError, ok, withApiHandler } from '@/lib/api/response';
-import { requireAdmin } from '@/lib/auth/session';
+import { requireAdmin, requireUser } from '@/lib/auth/session';
+import type { User } from '@/lib/db/schema';
 import {
   createSqlBackup,
   restoreSqlBackup,
@@ -50,7 +51,21 @@ function backupTimestamp(date = new Date()) {
   ].join('');
 }
 
-function backupFilename() {
+function safeFilenamePart(value: string) {
+  const cleaned = value
+    .trim()
+    .replace(/[^A-Za-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+  return cleaned.slice(0, 48) || 'user';
+}
+
+function backupFilename(user: User, fullBackup: boolean) {
+  if (!fullBackup) {
+    return `onefile-user-${user.id}-${safeFilenamePart(user.username)}-${backupTimestamp()}.sql`;
+  }
+
   return `${encodeSecretForFilename(getEnv().appSecret)}_${backupTimestamp()}.sql`;
 }
 
@@ -88,16 +103,10 @@ async function readSqlBackup(request: Request): Promise<SqlBackupPayload> {
       throw new HttpError(400, 'BAD_REQUEST', 'SQL 文件不能超过 25 MiB');
     }
 
-    const appSecret = parseAppSecretFromFilename(file.name);
-    if (!appSecret) {
-      throw new HttpError(
-        400,
-        'BAD_REQUEST',
-        '备份文件名必须是 <APP_SECRET>_yyyyMMddHHmmss.sql',
-      );
-    }
-
-    return { sqlText: await file.text(), appSecret };
+    return {
+      sqlText: await file.text(),
+      appSecret: parseAppSecretFromFilename(file.name),
+    };
   }
 
   const sqlText = await request.text();
@@ -113,14 +122,16 @@ async function readSqlBackup(request: Request): Promise<SqlBackupPayload> {
 
 export async function GET() {
   return withApiHandler(async () => {
-    await requireAdmin();
-    const sqlText = createSqlBackup();
+    const user = await requireUser();
+    const fullBackup = user.role === 'admin';
+    const sqlText = createSqlBackup(fullBackup ? {} : { userId: user.id });
 
     return new Response(sqlText, {
       headers: {
         'Cache-Control': 'no-store',
-        'Content-Disposition': `attachment; filename="${contentDispositionFilename(backupFilename())}"`,
+        'Content-Disposition': `attachment; filename="${contentDispositionFilename(backupFilename(user, fullBackup))}"`,
         'Content-Type': 'application/sql; charset=utf-8',
+        'X-OneFile-Backup-Scope': fullBackup ? 'full' : 'user',
       },
     });
   });

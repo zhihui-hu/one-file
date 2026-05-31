@@ -61,11 +61,13 @@ export function FileBrowser({
   prefix,
   onPrefixChange,
   onOpenAccounts,
+  onOpenBuckets,
 }: {
   bucket: StorageBucket | null;
   prefix: string;
   onPrefixChange: (prefix: string) => void;
   onOpenAccounts: () => void;
+  onOpenBuckets?: () => void;
 }) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
@@ -188,48 +190,62 @@ export function FileBrowser({
 
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden">
-      <div className="flex min-w-0 items-start gap-2 px-4 py-3 border-b shrink-0">
-        <InputGroup className="min-w-0 flex-1">
-          <InputGroupAddon align="inline-start">
-            <InputGroupButton
-              size="icon-sm"
-              variant="ghost"
-              className="cursor-pointer"
-              onClick={() => onPrefixChange(parentPrefix(prefix))}
+      <div className="flex min-w-0 shrink-0 flex-col gap-2 border-b px-3 py-2 sm:px-4 sm:py-3 lg:flex-row lg:items-start">
+        <div className="flex w-full min-w-0 items-start gap-2 lg:flex-1">
+          {onOpenBuckets && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="max-w-[42%] min-w-0 justify-start lg:hidden"
+              onClick={onOpenBuckets}
             >
-              <ArrowLeft />
-              <span className="sr-only">返回上级</span>
-            </InputGroupButton>
-          </InputGroupAddon>
-          <InputGroupInput
-            value={address}
-            onChange={(event) => setAddress(event.target.value)}
-            onBlur={() => setAddress(buildAddress(bucket.name, prefix))}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                submitAddress();
-              }
-            }}
-            aria-label="当前目录地址"
-          />
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton
-              size="icon-sm"
-              variant="ghost"
-              onClick={refresh}
-              className="cursor-pointer"
-            >
-              <RefreshCw
-                className={filesQuery.isFetching ? 'animate-spin' : undefined}
-              />
-              <span className="sr-only">刷新目录</span>
-            </InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
+              <Database data-icon="inline-start" />
+              <span className="min-w-0 truncate">{bucket.name}</span>
+            </Button>
+          )}
+          <InputGroup className="min-w-0 flex-1">
+            <InputGroupAddon align="inline-start">
+              <InputGroupButton
+                size="icon-sm"
+                variant="ghost"
+                className="cursor-pointer"
+                onClick={() => onPrefixChange(parentPrefix(prefix))}
+              >
+                <ArrowLeft />
+                <span className="sr-only">返回上级</span>
+              </InputGroupButton>
+            </InputGroupAddon>
+            <InputGroupInput
+              value={address}
+              onChange={(event) => setAddress(event.target.value)}
+              onBlur={() => setAddress(buildAddress(bucket.name, prefix))}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  submitAddress();
+                }
+              }}
+              aria-label="当前目录地址"
+            />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                size="icon-sm"
+                variant="ghost"
+                onClick={refresh}
+                className="cursor-pointer"
+              >
+                <RefreshCw
+                  className={filesQuery.isFetching ? 'animate-spin' : undefined}
+                />
+                <span className="sr-only">刷新目录</span>
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        </div>
 
-        <div className="flex shrink-0 items-start gap-2 ">
-          <InputGroup className="w-56 lg:w-72">
+        <div className="flex w-full min-w-0 shrink-0 items-start gap-2 lg:w-auto">
+          <InputGroup className="min-w-0 flex-1 sm:w-56 lg:w-72">
             <InputGroupAddon align="inline-start">
               <Search />
             </InputGroupAddon>
@@ -284,7 +300,7 @@ export function FileBrowser({
       >
         <ResponsiveDialog.Content
           className="sm:max-w-md"
-          drawerClassName="max-h-[92vh]"
+          drawerClassName="max-h-[92dvh]"
         >
           <form className="flex flex-col gap-4" onSubmit={submitCreateFolder}>
             <ResponsiveDialog.Header className="p-0 text-left">

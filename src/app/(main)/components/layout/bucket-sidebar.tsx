@@ -79,6 +79,7 @@ function BucketItem({
 export function BucketSidebar({
   accounts,
   buckets,
+  className,
   selectedBucket,
   loading,
   refreshing,
@@ -88,6 +89,7 @@ export function BucketSidebar({
 }: {
   accounts: StorageAccount[];
   buckets: StorageBucket[];
+  className?: string;
   selectedBucket: StorageBucket | null;
   loading: boolean;
   refreshing: boolean;
@@ -162,7 +164,12 @@ export function BucketSidebar({
   }, [accountMap, buckets, search]);
 
   return (
-    <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-r bg-muted/20">
+    <aside
+      className={cn(
+        'flex min-h-0 min-w-0 flex-col overflow-hidden border-r bg-muted/20',
+        className,
+      )}
+    >
       <div className="flex items-center gap-1.5 border-b p-2">
         <InputGroup className="h-7">
           <InputGroupAddon align="inline-start">

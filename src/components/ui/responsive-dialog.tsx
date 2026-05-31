@@ -22,6 +22,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { cn } from '@/lib/utils';
 import { XIcon } from 'lucide-react';
 import * as React from 'react';
 
@@ -104,8 +105,11 @@ function ResponsiveDialogContent({
   const { isMobile } = useResponsiveContext();
   if (isMobile) {
     return (
-      <DrawerContent className={drawerClassName} {...props}>
-        <div className="flex flex-1 flex-col overflow-hidden px-4 py-4">
+      <DrawerContent
+        className={cn('max-h-[92dvh]', drawerClassName)}
+        {...props}
+      >
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4">
           {children}
         </div>
         {showCloseButton !== false && (

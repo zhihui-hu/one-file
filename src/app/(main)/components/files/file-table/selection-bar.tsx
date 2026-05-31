@@ -14,9 +14,9 @@ export function FileSelectionBar({
   if (selectedFiles.length === 0) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center px-4">
-      <div className="pointer-events-auto flex items-center gap-3 rounded-lg border bg-background p-2 shadow-lg">
-        <span className="px-2 text-sm text-muted-foreground">
+    <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center px-3 sm:bottom-4 sm:px-4">
+      <div className="pointer-events-auto flex w-full max-w-md flex-wrap items-center justify-between gap-2 rounded-lg border bg-background p-2 shadow-lg sm:w-auto sm:justify-center sm:gap-3">
+        <span className="min-w-0 flex-1 truncate px-1 text-sm text-muted-foreground sm:flex-none sm:px-2">
           已选择 {selectedFiles.length} 个文件
         </span>
         <Button size="sm" variant="outline" onClick={onClearSelection}>

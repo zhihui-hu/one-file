@@ -168,7 +168,7 @@ function UploadQueueItem({
   const filePath = relativePath(task.file);
 
   return (
-    <div className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)_auto] items-start gap-2 px-3 py-2.5">
+    <div className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-start gap-2 px-3 py-2.5 sm:grid-cols-[2rem_minmax(0,1fr)_auto]">
       <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
         <FileArchive />
       </div>
@@ -179,10 +179,13 @@ function UploadQueueItem({
         >
           {filePath}
         </div>
-        <div className="mt-1 grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-2 text-xs text-muted-foreground">
+        <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Badge variant={meta.variant}>{meta.label}</Badge>
           <span className="shrink-0">{formatBytes(task.file.size)}</span>
-          <span className="block min-w-0 truncate" title={task.objectKey}>
+          <span
+            className="block min-w-0 flex-1 truncate"
+            title={task.objectKey}
+          >
             {task.objectKey}
           </span>
         </div>
@@ -201,7 +204,7 @@ function UploadQueueItem({
         )}
       </div>
 
-      <div className="flex shrink-0 items-center justify-end gap-1">
+      <div className="col-start-2 flex shrink-0 items-center justify-end gap-1 sm:col-start-auto">
         {(task.status === 'uploading' || task.status === 'preparing') && (
           <UploadTaskAction label="暂停上传" onClick={() => onPauseTask(task)}>
             <Pause />

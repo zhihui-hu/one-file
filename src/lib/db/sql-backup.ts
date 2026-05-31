@@ -38,6 +38,15 @@ type SqliteSequenceRow = {
   seq: number;
 };
 
+type TableRowFilter = {
+  params: unknown[];
+  sql: string;
+};
+
+type CreateSqlBackupOptions = {
+  userId?: number | null;
+};
+
 function quoteIdentifier(identifier: string) {
   return `"${identifier.replace(/"/g, '""')}"`;
 }
@@ -113,15 +122,44 @@ function tableRows(
   sqlite: Database.Database,
   table: string,
   columns: string[],
+  filter?: TableRowFilter | null,
 ) {
   if (columns.length === 0) {
     return [];
   }
 
   const columnList = columns.map(quoteIdentifier).join(', ');
+  const whereSql = filter ? ` WHERE ${filter.sql}` : '';
   return sqlite
-    .prepare(`SELECT ${columnList} FROM ${quoteIdentifier(table)}`)
-    .all() as Record<string, unknown>[];
+    .prepare(`SELECT ${columnList} FROM ${quoteIdentifier(table)}${whereSql}`)
+    .all(...(filter?.params ?? [])) as Record<string, unknown>[];
+}
+
+function userScopedTableFilter(
+  table: string,
+  columns: string[],
+  userId: number | null | undefined,
+): TableRowFilter | null {
+  if (!userId) {
+    return null;
+  }
+
+  if (table === 'onefile_users') {
+    return { sql: `${quoteIdentifier('id')} = ?`, params: [userId] };
+  }
+
+  if (table === 'onefile_file_upload_parts') {
+    return {
+      sql: `${quoteIdentifier('upload_id')} IN (SELECT ${quoteIdentifier('id')} FROM ${quoteIdentifier('onefile_file_uploads')} WHERE ${quoteIdentifier('user_id')} = ?)`,
+      params: [userId],
+    };
+  }
+
+  if (columns.includes('user_id')) {
+    return { sql: `${quoteIdentifier('user_id')} = ?`, params: [userId] };
+  }
+
+  return { sql: '0 = 1', params: [] };
 }
 
 function hasSqliteSequence(sqlite: Database.Database) {
@@ -234,13 +272,15 @@ export function validateSqlBackup(sqlText: string) {
   }
 }
 
-export function createSqlBackup() {
+export function createSqlBackup(options: CreateSqlBackupOptions = {}) {
   const sqlite = getSqlite();
   try {
     const tables = oneFileTables(sqlite);
+    const scopedUserId = options.userId ?? null;
     const lines = [
       '-- OneFile SQL backup',
       `-- Generated at ${new Date().toISOString()}`,
+      scopedUserId ? `-- Scope: user ${scopedUserId}` : '-- Scope: full',
       'PRAGMA foreign_keys=OFF;',
       'BEGIN TRANSACTION;',
       '',
@@ -257,8 +297,9 @@ export function createSqlBackup() {
       lines.push(`${tableCreateSql(sqlite, table)};`);
       const columns = tableColumns(sqlite, table);
       const quotedColumns = columns.map(quoteIdentifier).join(', ');
+      const filter = userScopedTableFilter(table, columns, scopedUserId);
 
-      for (const row of tableRows(sqlite, table, columns)) {
+      for (const row of tableRows(sqlite, table, columns, filter)) {
         const values = columns.map((column) => sqlLiteral(row[column]));
         lines.push(
           `INSERT INTO ${quoteIdentifier(table)} (${quotedColumns}) VALUES (${values.join(', ')});`,
@@ -274,7 +315,7 @@ export function createSqlBackup() {
       lines.push('');
     }
 
-    const sequences = sequenceRows(sqlite, tables);
+    const sequences = scopedUserId ? [] : sequenceRows(sqlite, tables);
     if (sequences.length > 0) {
       lines.push(
         `DELETE FROM "sqlite_sequence" WHERE "name" IN (${tables.map(sqlLiteral).join(', ')});`,

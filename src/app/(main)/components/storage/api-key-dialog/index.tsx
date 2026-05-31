@@ -164,8 +164,8 @@ export function ApiKeyDialog({
     <>
       <ResponsiveDialog open={open} onOpenChange={handleRootOpenChange}>
         <ResponsiveDialog.Content
-          className="sm:max-w-5xl"
-          drawerClassName="max-h-[92vh]"
+          className="flex max-h-[min(90dvh,42rem)] flex-col overflow-hidden sm:max-w-5xl"
+          drawerClassName="h-[92dvh] max-h-[92dvh]"
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <ResponsiveDialog.Header className="min-w-0 p-0 text-left">
@@ -205,7 +205,7 @@ export function ApiKeyDialog({
       >
         <ResponsiveDialog.Content
           className="sm:max-w-md"
-          drawerClassName="max-h-[92vh]"
+          drawerClassName="max-h-[92dvh]"
         >
           <ResponsiveDialog.Header className="p-0 text-left">
             <ResponsiveDialog.Title>添加 API key</ResponsiveDialog.Title>

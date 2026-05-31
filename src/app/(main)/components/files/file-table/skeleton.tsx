@@ -3,37 +3,39 @@ import { cn } from '@/lib/utils';
 
 export function FileTableSkeleton() {
   const colClasses = [
-    'w-10 text-center',
-    'w-96',
-    'w-24',
+    'w-8 text-center',
+    'w-72 xl:w-96',
+    'w-20',
     'w-24 text-right',
-    'w-40',
+    'w-36 xl:w-40',
     'w-10',
   ] as const;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <table className="min-w-[840px] w-full table-fixed text-xs shrink-0">
-        <thead className="[&_th]:bg-background">
-          <tr className="border-b">
-            {(['', '名称', '类型', '大小', '修改日期', ''] as const).map(
-              (label, i) => (
-                <th
-                  key={i}
-                  className={cn(
-                    'h-8 border-b px-2 py-1 text-left align-middle font-medium text-foreground',
-                    colClasses[i],
-                  )}
-                >
-                  {label ? <Skeleton className="h-3 w-14" /> : null}
-                </th>
-              ),
-            )}
-          </tr>
-        </thead>
-      </table>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <table className="min-w-[840px] w-full table-fixed text-xs">
+      <div className="hidden shrink-0 lg:block">
+        <table className="min-w-[680px] w-full table-fixed text-sm">
+          <thead className="[&_th]:bg-background">
+            <tr className="border-b">
+              {(['', '名称', '类型', '大小', '修改日期', ''] as const).map(
+                (label, i) => (
+                  <th
+                    key={i}
+                    className={cn(
+                      'h-8 border-b px-2 py-1 text-left align-middle font-medium text-foreground',
+                      colClasses[i],
+                    )}
+                  >
+                    {label ? <Skeleton className="h-3 w-14" /> : null}
+                  </th>
+                ),
+              )}
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <div className="hidden min-h-0 flex-1 overflow-y-auto lg:block">
+        <table className="min-w-[680px] w-full table-fixed text-sm">
           <tbody>
             {Array.from({ length: 12 }).map((_, index) => (
               <tr key={index} className="border-b last:border-0">
@@ -67,6 +69,27 @@ export function FileTableSkeleton() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2 lg:hidden">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div key={index} className="rounded-lg border bg-card p-2.5">
+            <div className="flex min-w-0 items-start gap-2">
+              <Skeleton className="mt-1 size-4 shrink-0 rounded-sm" />
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-2 px-1">
+                  <Skeleton className="size-7 shrink-0 rounded-md" />
+                  <Skeleton className="h-4 min-w-0 flex-1" />
+                </div>
+                <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 px-1">
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                  <Skeleton className="h-3.5 w-16" />
+                  <Skeleton className="h-3.5 w-24 max-w-[45%]" />
+                </div>
+              </div>
+              <Skeleton className="size-7 shrink-0 rounded-md" />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

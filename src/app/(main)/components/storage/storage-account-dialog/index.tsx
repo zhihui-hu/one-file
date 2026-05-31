@@ -248,8 +248,8 @@ export function StorageAccountDialog({
     <>
       <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
         <ResponsiveDialog.Content
-          className="sm:max-w-5xl"
-          drawerClassName="max-h-[92vh]"
+          className="flex max-h-[min(90dvh,42rem)] flex-col overflow-hidden sm:max-w-5xl"
+          drawerClassName="h-[92dvh] max-h-[92dvh]"
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between ">
             <ResponsiveDialog.Header className="min-w-0 p-0 text-left">
@@ -264,7 +264,7 @@ export function StorageAccountDialog({
             </Button>
           </div>
 
-          <div className="grid min-h-0 gap-4 md:min-h-[520px] md:grid-cols-[minmax(220px,2fr)_minmax(0,3fr)]">
+          <div className="grid min-h-0 flex-1 grid-rows-[minmax(10rem,1fr)_minmax(12rem,1.15fr)] gap-3 overflow-hidden md:min-h-[520px] md:grid-cols-[minmax(220px,2fr)_minmax(0,3fr)] md:grid-rows-none md:gap-4">
             <section className="flex min-h-0 flex-col rounded-lg border">
               <div className="border-b p-3">
                 <div className="text-sm font-medium">账号</div>
@@ -344,7 +344,7 @@ export function StorageAccountDialog({
       >
         <ResponsiveDialog.Content
           className="sm:max-w-sm"
-          drawerClassName="max-h-[92vh]"
+          drawerClassName="max-h-[92dvh]"
         >
           <ResponsiveDialog.Header className="p-0 text-left">
             <ResponsiveDialog.Title>删除存储账号</ResponsiveDialog.Title>
