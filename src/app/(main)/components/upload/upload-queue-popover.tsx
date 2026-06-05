@@ -99,9 +99,9 @@ export function UploadQueuePopover({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-[min(30rem,calc(100vw-2rem))] p-0"
+        className="max-h-[min(34rem,var(--radix-popover-content-available-height))] w-[min(30rem,calc(100vw-2rem))] gap-0 overflow-hidden p-0"
       >
-        <PopoverHeader className="gap-2 p-3 pb-2">
+        <PopoverHeader className="shrink-0 gap-2 p-3 pb-2">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <PopoverTitle>上传队列</PopoverTitle>
@@ -129,9 +129,9 @@ export function UploadQueuePopover({
           </div>
           <Progress value={stats.totalProgress} />
         </PopoverHeader>
-        <Separator />
+        <Separator className="shrink-0" />
         <TooltipProvider>
-          <ScrollArea className="max-h-80">
+          <ScrollArea className="min-h-0 flex-1 overflow-hidden">
             <div className="divide-y">
               {tasks.map((task) => (
                 <UploadQueueItem
