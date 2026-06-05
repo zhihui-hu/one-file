@@ -131,7 +131,16 @@ export function UploadQueuePopover({
         </PopoverHeader>
         <Separator className="shrink-0" />
         <TooltipProvider>
-          <ScrollArea className="min-h-0 flex-1 overflow-hidden">
+          <ScrollArea
+            className="min-h-0"
+            style={
+              {
+                '--upload-queue-list-max-height':
+                  'min(26rem, max(10rem, calc(var(--radix-popover-content-available-height) - 8rem)))',
+              } as React.CSSProperties
+            }
+            viewportClassName="max-h-[var(--upload-queue-list-max-height)]"
+          >
             <div className="divide-y">
               {tasks.map((task) => (
                 <UploadQueueItem
