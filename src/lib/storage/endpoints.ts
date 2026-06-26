@@ -1,5 +1,7 @@
 import type { StorageProviderId } from './types';
 
+export type BucketPublicUrlStyle = 'path' | 'virtual_hosted';
+
 export function optionalStorageString(value?: string | null) {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
@@ -48,32 +50,52 @@ function aliyunEndpointFromRegion(region?: string | null) {
   return `https://oss-${regionValue}.aliyuncs.com`;
 }
 
-export function defaultStorageEndpoint({
-  provider,
-  region,
-  accountId,
-}: {
-  provider: StorageProviderId;
-  region?: string | null;
-  accountId?: string | null;
-}) {
-  switch (provider) {
-    case 'r2': {
-      const normalizedAccountId = optionalStorageString(accountId);
-      return normalizedAccountId
-        ? `https://${normalizedAccountId}.r2.cloudflarestorage.com`
-        : null;
-    }
-    case 'aliyun_oss':
-      return aliyunEndpointFromRegion(region);
-    case 'tencent_cos':
-      return null;
-    default:
-      return null;
+function storageEndpointUrl(endpoint?: string | null) {
+  const normalized = optionalStorageString(endpoint);
+  if (!normalized) {
+    return null;
+  }
+
+  const withProtocol = /^[a-z][a-z\d+.-]*:\/\//i.test(normalized)
+    ? normalized
+    : `https://${normalized}`;
+
+  try {
+    const url = new URL(withProtocol);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url : null;
+  } catch {
+    return null;
   }
 }
 
-export function defaultBucketPublicUrl({
+function pathWithoutTrailingSlash(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, '');
+  return normalized === '/' ? '' : normalized;
+}
+
+function endpointBucketPublicUrl({
+  endpoint,
+  bucketName,
+  style = 'path',
+}: {
+  endpoint?: string | null;
+  bucketName: string;
+  style?: BucketPublicUrlStyle | null;
+}) {
+  const url = storageEndpointUrl(endpoint);
+  if (!url) {
+    return null;
+  }
+
+  const basePath = pathWithoutTrailingSlash(url.pathname);
+  if (style === 'virtual_hosted') {
+    return `${url.protocol}//${bucketName}.${url.host}${basePath}`;
+  }
+
+  return `${url.protocol}//${url.host}${basePath}/${bucketName}`;
+}
+
+export function legacyDefaultBucketPublicUrl({
   provider,
   bucketName,
   region,
@@ -103,6 +125,82 @@ export function defaultBucketPublicUrl({
         optionalStorageString(region) ?? defaultStorageRegion(provider);
       return `https://${normalizedBucket}.s3.${regionValue}.amazonaws.com`;
     }
+    case 'oci': {
+      const regionValue = optionalStorageString(region);
+      const namespaceValue = optionalStorageString(namespace);
+      return regionValue && namespaceValue
+        ? `https://objectstorage.${regionValue}.oraclecloud.com/n/${namespaceValue}/b/${normalizedBucket}/o`
+        : null;
+    }
+    default:
+      return null;
+  }
+}
+
+export function defaultStorageEndpoint({
+  provider,
+  region,
+  accountId,
+}: {
+  provider: StorageProviderId;
+  region?: string | null;
+  accountId?: string | null;
+}) {
+  switch (provider) {
+    case 'r2': {
+      const normalizedAccountId = optionalStorageString(accountId);
+      return normalizedAccountId
+        ? `https://${normalizedAccountId}.r2.cloudflarestorage.com`
+        : null;
+    }
+    case 'aliyun_oss':
+      return aliyunEndpointFromRegion(region);
+    case 'tencent_cos':
+      return null;
+    default:
+      return null;
+  }
+}
+
+export function defaultBucketPublicUrl({
+  provider,
+  bucketName,
+  region,
+  endpoint,
+  accountId,
+  namespace,
+  urlStyle,
+}: {
+  provider: StorageProviderId;
+  bucketName: string;
+  region?: string | null;
+  endpoint?: string | null;
+  accountId?: string | null;
+  namespace?: string | null;
+  urlStyle?: BucketPublicUrlStyle | null;
+}) {
+  const normalizedBucket = optionalStorageString(bucketName);
+  if (!normalizedBucket) {
+    return null;
+  }
+
+  switch (provider) {
+    case 'r2':
+      return null;
+    case 's3': {
+      const endpointUrl = endpointBucketPublicUrl({
+        endpoint,
+        bucketName: normalizedBucket,
+        style: urlStyle,
+      });
+      if (endpointUrl) {
+        return endpointUrl;
+      }
+
+      const regionValue =
+        optionalStorageString(region) ?? defaultStorageRegion(provider);
+      return `https://${normalizedBucket}.s3.${regionValue}.amazonaws.com`;
+    }
     case 'aliyun_oss': {
       const regionValue =
         normalizeAliyunRegion(region) ?? defaultStorageRegion(provider);
@@ -124,4 +222,52 @@ export function defaultBucketPublicUrl({
     default:
       return null;
   }
+}
+
+export function resolvedBucketPublicUrl({
+  provider,
+  bucketName,
+  region,
+  endpoint,
+  accountId,
+  namespace,
+  publicBaseUrl,
+  urlStyle,
+}: {
+  provider: StorageProviderId;
+  bucketName: string;
+  region?: string | null;
+  endpoint?: string | null;
+  accountId?: string | null;
+  namespace?: string | null;
+  publicBaseUrl?: string | null;
+  urlStyle?: BucketPublicUrlStyle | null;
+}) {
+  const explicitBaseUrl = optionalStorageString(publicBaseUrl);
+  const legacyBaseUrl = legacyDefaultBucketPublicUrl({
+    provider,
+    bucketName,
+    region,
+    accountId,
+    namespace,
+  });
+
+  if (
+    explicitBaseUrl &&
+    explicitBaseUrl.replace(/\/+$/, '') !== legacyBaseUrl?.replace(/\/+$/, '')
+  ) {
+    return explicitBaseUrl.replace(/\/+$/, '');
+  }
+
+  return (
+    defaultBucketPublicUrl({
+      provider,
+      bucketName,
+      region,
+      endpoint,
+      accountId,
+      namespace,
+      urlStyle,
+    })?.replace(/\/+$/, '') ?? null
+  );
 }

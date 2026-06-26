@@ -71,7 +71,15 @@ export class S3CompatibleStorageAdapter implements StorageAdapter {
   ): Promise<CheckStorageCredentialsResult> {
     try {
       if (input.bucket) {
-        await this.client.send(new HeadBucketCommand({ Bucket: input.bucket }));
+        try {
+          await this.client.send(
+            new HeadBucketCommand({ Bucket: input.bucket }),
+          );
+        } catch {
+          await this.client.send(
+            new ListObjectsV2Command({ Bucket: input.bucket, MaxKeys: 1 }),
+          );
+        }
       } else {
         await this.client.send(new ListBucketsCommand({}));
       }

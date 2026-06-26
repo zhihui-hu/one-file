@@ -10,6 +10,7 @@ import {
 import {
   defaultBucketPublicUrl,
   defaultStorageEndpoint,
+  legacyDefaultBucketPublicUrl,
   optionalStorageString,
 } from '@/lib/storage/endpoints';
 import { sql } from 'drizzle-orm';
@@ -58,6 +59,14 @@ export async function POST(
         provider: account.provider,
         bucketName: bucket.name,
         region,
+        endpoint,
+        accountId: account.providerAccountId,
+        namespace: account.namespace,
+      });
+      const legacyPublicBaseUrl = legacyDefaultBucketPublicUrl({
+        provider: account.provider,
+        bucketName: bucket.name,
+        region,
         accountId: account.providerAccountId,
         namespace: account.namespace,
       });
@@ -83,7 +92,9 @@ export async function POST(
           set: {
             region,
             endpoint,
-            publicBaseUrl: sql`coalesce(nullif(${storageBuckets.publicBaseUrl}, ''), excluded.public_base_url)`,
+            publicBaseUrl: legacyPublicBaseUrl
+              ? sql`case when ${storageBuckets.publicBaseUrl} is null or ${storageBuckets.publicBaseUrl} = '' or ${storageBuckets.publicBaseUrl} = ${legacyPublicBaseUrl} then excluded.public_base_url else ${storageBuckets.publicBaseUrl} end`
+              : sql`coalesce(nullif(${storageBuckets.publicBaseUrl}, ''), excluded.public_base_url)`,
             updatedAt: now,
           },
         })

@@ -336,6 +336,15 @@ export async function updateBucket(id: number | string, payload: JsonObject) {
   return asStorageBucket(data);
 }
 
+export async function createBucket(payload: JsonObject) {
+  const data = await jsonRequest<MaybeStorageBucket>(
+    '/api/storage/buckets',
+    'POST',
+    payload,
+  );
+  return asStorageBucket(data);
+}
+
 export async function listFiles(params: {
   bucketId: number | string;
   prefix?: string;

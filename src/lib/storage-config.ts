@@ -65,7 +65,7 @@ export function publicStorageBucket(
     provider_account_id: account?.providerAccountId,
     name: bucket.name,
     region: bucket.region,
-    endpoint: bucket.endpoint,
+    endpoint: bucket.endpoint ?? account?.endpoint,
     namespace: account?.namespace,
     key_prefix: bucket.keyPrefix,
     public_base_url: bucket.publicBaseUrl,
@@ -151,23 +151,34 @@ export function adapterFromAccount(account: StorageAccount) {
   return createStorageAdapter(adapterConfigFromAccount(account));
 }
 
-export function adapterFromAccountForBucket(
+export function adapterFromAccountForBucketConfig(
   account: StorageAccount,
-  bucket: StorageBucket,
+  bucketConfig: { region?: string | null; endpoint?: string | null },
 ) {
-  if (account.provider !== 'aliyun_oss') {
-    return adapterFromAccount(account);
-  }
-
   const config = adapterConfigFromAccount(account);
-  const region = bucket.region?.trim();
-  const endpoint = bucket.endpoint?.trim();
+  const region = bucketConfig.region?.trim();
+  const endpoint = bucketConfig.endpoint?.trim();
+
+  if (account.provider !== 'aliyun_oss') {
+    return createStorageAdapter({
+      ...config,
+      region: region || config.region,
+      endpoint: endpoint || config.endpoint,
+    });
+  }
 
   return createStorageAdapter({
     ...config,
     region: region || config.region,
     endpoint: endpoint || (region ? null : config.endpoint),
   });
+}
+
+export function adapterFromAccountForBucket(
+  account: StorageAccount,
+  bucket: StorageBucket,
+) {
+  return adapterFromAccountForBucketConfig(account, bucket);
 }
 
 export function applyBucketKeyPrefix(bucket: StorageBucket, objectKey: string) {

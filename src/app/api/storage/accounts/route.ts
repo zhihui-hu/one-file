@@ -70,6 +70,12 @@ function throwStorageAccountConflict(error: unknown): never {
   throw error;
 }
 
+function needsAccountWideCredentialCheck(
+  provider: z.infer<typeof providerSchema>,
+) {
+  return !['s3', 'r2', 'b2'].includes(provider);
+}
+
 export async function GET() {
   return withApiHandler(async () => {
     const user = await requireUser();
@@ -112,22 +118,24 @@ export async function POST(request: Request) {
       extraConfig.compartmentId = payload.compartment_id;
     }
 
-    const check = await createStorageAdapter({
-      provider: payload.provider,
-      accessKeyId: payload.access_key_id,
-      secretAccessKey: payload.secret_access_key,
-      region,
-      endpoint,
-      extraConfig,
-    }).checkCredentials();
+    if (needsAccountWideCredentialCheck(payload.provider)) {
+      const check = await createStorageAdapter({
+        provider: payload.provider,
+        accessKeyId: payload.access_key_id,
+        secretAccessKey: payload.secret_access_key,
+        region,
+        endpoint,
+        extraConfig,
+      }).checkCredentials();
 
-    if (!check.ok) {
-      throw new HttpError(
-        400,
-        'PROVIDER_ERROR',
-        `凭证校验失败：${check.error?.message ?? '请检查 Access key、Secret key、Region 和 Endpoint。'}`,
-        check.error,
-      );
+      if (!check.ok) {
+        throw new HttpError(
+          400,
+          'PROVIDER_ERROR',
+          `凭证校验失败：${check.error?.message ?? '请检查 Access key、Secret key、Region 和 Endpoint。'}`,
+          check.error,
+        );
+      }
     }
 
     const now = new Date().toISOString();

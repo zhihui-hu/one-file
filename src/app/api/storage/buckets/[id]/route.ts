@@ -34,7 +34,7 @@ export async function PATCH(
       .update(storageBuckets)
       .set({
         ...(payload.key_prefix !== undefined
-          ? { keyPrefix: payload.key_prefix.replace(/^\/+/, '') }
+          ? { keyPrefix: payload.key_prefix.replace(/^\/+|\/+$/g, '') }
           : {}),
         ...(payload.public_base_url !== undefined
           ? { publicBaseUrl: payload.public_base_url }

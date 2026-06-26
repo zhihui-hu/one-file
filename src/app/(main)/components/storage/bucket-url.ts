@@ -1,5 +1,5 @@
 import type { StorageBucket } from '@/app/(main)/components/types';
-import { defaultBucketPublicUrl } from '@/lib/storage/endpoints';
+import { resolvedBucketPublicUrl } from '@/lib/storage/endpoints';
 import {
   STORAGE_PROVIDER_IDS,
   type StorageProviderId,
@@ -16,21 +16,16 @@ function storageProviderId(value?: string | null): StorageProviderId | null {
 export function bucketPublicBaseUrl(bucket: StorageBucket | null) {
   if (!bucket) return null;
 
-  const explicitBaseUrl = bucket.public_base_url?.trim();
-  if (explicitBaseUrl) {
-    return explicitBaseUrl.replace(/\/+$/, '');
-  }
-
   const provider = storageProviderId(bucket.provider);
   if (!provider) return null;
 
-  return (
-    defaultBucketPublicUrl({
-      provider,
-      bucketName: bucket.name,
-      region: bucket.region,
-      accountId: bucket.provider_account_id,
-      namespace: bucket.namespace,
-    })?.replace(/\/+$/, '') ?? null
-  );
+  return resolvedBucketPublicUrl({
+    provider,
+    bucketName: bucket.name,
+    region: bucket.region,
+    endpoint: bucket.endpoint,
+    accountId: bucket.provider_account_id,
+    namespace: bucket.namespace,
+    publicBaseUrl: bucket.public_base_url,
+  });
 }

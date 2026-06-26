@@ -15,7 +15,7 @@ import {
   getStorageBucketForUser,
   stripBucketKeyPrefix,
 } from '@/lib/storage-config';
-import { defaultBucketPublicUrl } from '@/lib/storage/endpoints';
+import { resolvedBucketPublicUrl } from '@/lib/storage/endpoints';
 import { and, asc, eq } from 'drizzle-orm';
 import { NextRequest } from 'next/server';
 
@@ -61,15 +61,15 @@ function publicObjectUrl({
   bucket: typeof storageBuckets.$inferSelect;
   providerKey: string;
 }) {
-  const base =
-    bucket.publicBaseUrl?.trim().replace(/\/+$/, '') ||
-    defaultBucketPublicUrl({
-      provider: account.provider,
-      bucketName: bucket.name,
-      region: bucket.region || account.region,
-      accountId: account.providerAccountId,
-      namespace: account.namespace,
-    })?.replace(/\/+$/, '');
+  const base = resolvedBucketPublicUrl({
+    provider: account.provider,
+    bucketName: bucket.name,
+    region: bucket.region || account.region,
+    endpoint: bucket.endpoint || account.endpoint,
+    accountId: account.providerAccountId,
+    namespace: account.namespace,
+    publicBaseUrl: bucket.publicBaseUrl,
+  });
 
   if (!base) return null;
 

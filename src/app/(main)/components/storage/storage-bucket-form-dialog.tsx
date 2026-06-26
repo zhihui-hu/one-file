@@ -20,6 +20,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod/v4';
 
 const bucketFormSchema = z.object({
+  key_prefix: z.string().trim().max(400),
   public_base_url: z
     .string()
     .trim()
@@ -39,12 +40,14 @@ export type BucketForm = z.infer<typeof bucketFormSchema>;
 
 function bucketFormFromStorageBucket(bucket: StorageBucket | null): BucketForm {
   return {
+    key_prefix: bucket?.key_prefix || '',
     public_base_url: bucket?.public_base_url || '',
   };
 }
 
 export function buildStorageBucketPayload(values: BucketForm) {
   return {
+    key_prefix: values.key_prefix || '',
     public_base_url: values.public_base_url || null,
   };
 }
@@ -92,6 +95,21 @@ export function StorageBucketFormDialog({
           onSubmit={form.handleSubmit(onSubmit)}
         >
           <FieldGroup>
+            <Field
+              className="min-w-0"
+              data-invalid={Boolean(form.formState.errors.key_prefix)}
+            >
+              <FieldLabel htmlFor="bucket-key-prefix">Key Prefix</FieldLabel>
+              <Input
+                id="bucket-key-prefix"
+                aria-invalid={Boolean(form.formState.errors.key_prefix)}
+                placeholder="uploads"
+                {...form.register('key_prefix')}
+              />
+              <FieldDescription>留空表示使用 bucket 根目录。</FieldDescription>
+              <FieldError errors={[form.formState.errors.key_prefix]} />
+            </Field>
+
             <Field
               className="min-w-0"
               data-invalid={Boolean(form.formState.errors.public_base_url)}

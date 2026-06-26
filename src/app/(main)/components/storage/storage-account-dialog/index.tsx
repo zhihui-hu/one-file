@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  createBucket,
   createStorageAccount,
   deleteStorageAccount,
   listBuckets,
@@ -21,6 +22,11 @@ import {
   StorageBucketFormDialog,
   buildStorageBucketPayload,
 } from '@/app/(main)/components/storage/storage-bucket-form-dialog';
+import {
+  type ManualBucketForm,
+  StorageBucketManualDialog,
+  buildManualBucketPayload,
+} from '@/app/(main)/components/storage/storage-bucket-manual-dialog';
 import type {
   StorageAccount,
   StorageBucket,
@@ -65,6 +71,7 @@ export function StorageAccountDialog({
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<StorageAccount | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<StorageAccount | null>(null);
+  const [manualBucketOpen, setManualBucketOpen] = useState(false);
   const [editingBucket, setEditingBucket] = useState<StorageBucket | null>(
     null,
   );
@@ -159,21 +166,6 @@ export function StorageAccountDialog({
         ? await updateStorageAccount(editing.id, payload)
         : await createStorageAccount(payload);
 
-      try {
-        await syncBuckets(account.id);
-      } catch (error) {
-        if (!wasEditing) {
-          await deleteStorageAccount(account.id).catch(() => undefined);
-        }
-
-        throw new Error(
-          `bucket 同步失败：${mutationErrorMessage(
-            error,
-            '请检查 Access key、Secret key、Region 和 Endpoint。',
-          )}`,
-        );
-      }
-
       return { account, wasEditing };
     },
     onMutate: () => {
@@ -213,6 +205,23 @@ export function StorageAccountDialog({
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : '同步失败'),
+  });
+
+  const manualBucketMutation = useMutation({
+    mutationFn: async (values: ManualBucketForm) => {
+      if (!selectedAccount) {
+        throw new Error('请选择存储账号。');
+      }
+
+      return createBucket(buildManualBucketPayload(values, selectedAccount));
+    },
+    onSuccess: async () => {
+      toast.success('bucket 已添加');
+      setManualBucketOpen(false);
+      await invalidateBuckets();
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : '添加失败'),
   });
 
   const bucketMutation = useMutation({
@@ -299,21 +308,34 @@ export function StorageAccountDialog({
                       : '选择左侧账号'}
                   </div>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={!selectedAccount || syncMutation.isPending}
-                  onClick={() =>
-                    selectedAccount && syncMutation.mutate(selectedAccount.id)
-                  }
-                >
-                  {syncMutation.isPending ? (
-                    <Spinner data-icon="inline-start" />
-                  ) : (
-                    <RefreshCw data-icon="inline-start" />
-                  )}
-                  同步
-                </Button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={
+                      !selectedAccount || manualBucketMutation.isPending
+                    }
+                    onClick={() => setManualBucketOpen(true)}
+                  >
+                    <Plus data-icon="inline-start" />
+                    添加 bucket
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!selectedAccount || syncMutation.isPending}
+                    onClick={() =>
+                      selectedAccount && syncMutation.mutate(selectedAccount.id)
+                    }
+                  >
+                    {syncMutation.isPending ? (
+                      <Spinner data-icon="inline-start" />
+                    ) : (
+                      <RefreshCw data-icon="inline-start" />
+                    )}
+                    同步
+                  </Button>
+                </div>
               </div>
               <ScrollArea className="min-h-0 flex-1">
                 <div className="flex flex-col gap-2 p-3">
@@ -325,6 +347,7 @@ export function StorageAccountDialog({
                     onSyncSelectedAccount={() =>
                       selectedAccount && syncMutation.mutate(selectedAccount.id)
                     }
+                    onAddBucket={() => setManualBucketOpen(true)}
                     onEditBucket={setEditingBucket}
                   />
                 </div>
@@ -408,6 +431,17 @@ export function StorageAccountDialog({
         bucket={editingBucket}
         pending={bucketMutation.isPending}
         onSubmit={(values) => bucketMutation.mutate(values)}
+      />
+
+      <StorageBucketManualDialog
+        open={manualBucketOpen}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && manualBucketMutation.isPending) return;
+          setManualBucketOpen(nextOpen);
+        }}
+        account={selectedAccount}
+        pending={manualBucketMutation.isPending}
+        onSubmit={(values) => manualBucketMutation.mutate(values)}
       />
     </>
   );

@@ -28,7 +28,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { Database, Pencil, RefreshCw } from 'lucide-react';
+import { Database, Pencil, Plus, RefreshCw } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 
 import { bucketPublicBaseUrl } from './bucket-url';
@@ -108,6 +108,7 @@ export function StorageAccountBucketList({
   selectedBuckets,
   syncPending,
   onSyncSelectedAccount,
+  onAddBucket,
   onEditBucket,
 }: {
   isLoading: boolean;
@@ -115,6 +116,7 @@ export function StorageAccountBucketList({
   selectedBuckets: StorageBucket[];
   syncPending: boolean;
   onSyncSelectedAccount: () => void;
+  onAddBucket: () => void;
   onEditBucket: (bucket: StorageBucket) => void;
 }) {
   const columns = useMemo<ColumnDef<StorageBucket>[]>(
@@ -217,22 +219,28 @@ export function StorageAccountBucketList({
           </EmptyMedia>
           <EmptyTitle>还没有 bucket</EmptyTitle>
           <EmptyDescription>
-            同步当前账号后会显示可浏览 bucket。
+            同步当前账号或手动添加后会显示可浏览 bucket。
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button
-            size="sm"
-            disabled={syncPending}
-            onClick={onSyncSelectedAccount}
-          >
-            {syncPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <RefreshCw data-icon="inline-start" />
-            )}
-            同步 bucket
-          </Button>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button size="sm" variant="outline" onClick={onAddBucket}>
+              <Plus data-icon="inline-start" />
+              添加 bucket
+            </Button>
+            <Button
+              size="sm"
+              disabled={syncPending}
+              onClick={onSyncSelectedAccount}
+            >
+              {syncPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <RefreshCw data-icon="inline-start" />
+              )}
+              同步 bucket
+            </Button>
+          </div>
         </EmptyContent>
       </Empty>
     );
