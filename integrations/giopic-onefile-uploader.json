@@ -1,0 +1,69 @@
+{
+  "id": "onefile.uploader",
+  "kind": "uploader",
+  "name": "OneFile",
+  "version": "1.0.0",
+  "author": "OneFile",
+  "description": "Upload images to a OneFile instance and return the public object URL.",
+  "homepage": "https://github.com/huzhihui/one-file",
+  "icon": "i-ph-cloud-arrow-up",
+  "uploader": {
+    "inputs": [
+      {
+        "name": "baseUrl",
+        "label": "OneFile URL",
+        "type": "text",
+        "required": true,
+        "placeholder": "https://onefile.example.com",
+        "help": "OneFile site origin. Do not include a trailing slash."
+      },
+      {
+        "name": "authMode",
+        "label": "Upload Mode",
+        "type": "select",
+        "default": "api_key",
+        "options": [
+          {
+            "label": "API Key",
+            "value": "api_key"
+          },
+          {
+            "label": "Public Upload Link",
+            "value": "public_upload"
+          }
+        ]
+      },
+      {
+        "name": "apiKey",
+        "label": "API Key",
+        "type": "password",
+        "placeholder": "ofk_xxx_xxx",
+        "help": "Use a OneFile file API key that includes uploads:write. The key's bucket and image compression settings are used automatically.",
+        "visibleWhen": {
+          "field": "authMode",
+          "equals": "api_key"
+        }
+      },
+      {
+        "name": "publicUpload",
+        "label": "Public Upload UUID or URL",
+        "type": "text",
+        "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+        "help": "Paste the UUID from /:uuid or the full /api/public-uploads/:uuid URL.",
+        "visibleWhen": {
+          "field": "authMode",
+          "equals": "public_upload"
+        }
+      },
+      {
+        "name": "keyPrefix",
+        "label": "Object Prefix",
+        "type": "text",
+        "required": false,
+        "placeholder": "giopic",
+        "help": "Optional. When set, OneFile stores files as <prefix>/<original filename>. Leave empty to use OneFile's default date prefix."
+      }
+    ],
+    "script": "return async function(config, file, ctx) {\n  const baseUrl = String(config.baseUrl || '').trim().replace(/\\/+$/, '');\n  if (!baseUrl) throw new Error('Missing OneFile URL');\n\n  const authMode = String(config.authMode || 'api_key');\n  const headers = { 'Accept': 'application/json, text/plain, */*' };\n  let uploadUrl = '';\n\n  if (authMode === 'public_upload') {\n    const publicUpload = String(config.publicUpload || '').trim();\n    if (!publicUpload) throw new Error('Missing public upload UUID or URL');\n    if (/^https?:\\/\\//i.test(publicUpload)) {\n      uploadUrl = publicUpload;\n    } else {\n      const uuid = publicUpload.replace(/^\\/+|\\/+$/g, '').replace(/^api\\/public-uploads\\//i, '');\n      uploadUrl = baseUrl + '/api/public-uploads/' + encodeURIComponent(uuid);\n    }\n  } else {\n    const apiKey = String(config.apiKey || '').trim();\n    if (!apiKey) throw new Error('Missing API key');\n    headers.Authorization = 'Bearer ' + apiKey;\n    uploadUrl = baseUrl + '/api/uploads/direct';\n  }\n\n  const blob = await (await fetch(file.data)).blob();\n  const fd = new FormData();\n  fd.append('file', blob, file.name);\n  fd.append('original_filename', file.name);\n\n  const keyPrefix = String(config.keyPrefix || '').trim().replace(/^\\/+|\\/+$/g, '');\n  if (keyPrefix) {\n    const safeName = String(file.name || 'image').replace(/^\\/+/, '');\n    fd.append('object_key', keyPrefix + '/' + safeName);\n  }\n\n  const res = await ctx.fetch(uploadUrl, { method: 'POST', headers, body: fd });\n  const json = res.body;\n  if (!res.ok || (json && json.error)) {\n    const message = json && json.error ? json.error.message : (json && (json.message || json.msg));\n    throw new Error(message || ('HTTP ' + res.status));\n  }\n\n  const data = json && json.data ? json.data : json;\n  const url = data && (data.url || data.location);\n  if (!url) throw new Error('Upload succeeded but OneFile did not return a public URL. Check the bucket Public URL setting.');\n  return url;\n}"
+  }
+}

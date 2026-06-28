@@ -230,6 +230,28 @@ Authorization: Bearer ofk_xxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 如果只是想让别人用浏览器上传，请优先使用公开上传页；如果是程序、图床客户端、CI 或编辑器接入，再使用 bearer token。
 
+<h3 id="giopic-web-extension">GioPic Web Extension</h3>
+
+仓库内置了一个 GioPic uploader 插件：
+
+- 插件文件：[integrations/giopic-onefile-uploader.json](./integrations/giopic-onefile-uploader.json)
+- 使用说明：[integrations/README.md](./integrations/README.md)
+
+推荐接入流程：
+
+1. 在 OneFile 后台添加并配置对象存储 bucket，确保 bucket 的 `Public URL` 可访问。S3 兼容服务会优先使用你配置的 endpoint；R2 建议填写自定义域名或公开访问地址。
+2. 创建一个文件 API key，授予 `uploads:write`，并绑定到目标 bucket。是否压缩图片也在这个 API key 上配置。
+3. 在 GioPic Web Extension 的插件页面导入 `integrations/giopic-onefile-uploader.json`。
+4. 在插件配置中填写：
+   - `OneFile URL`：你的 OneFile 站点地址，例如 `https://onefile.example.com`
+   - `Upload Mode`：推荐选择 `API Key`
+   - `API Key`：OneFile 生成的 `ofk_...`
+   - `Object Prefix`：可选，例如 `giopic`
+
+这样 GioPic 只持有 OneFile API key，不需要保存 S3、R2、OSS、COS 等对象存储密钥。上传链路仍然由 OneFile 负责鉴权、图片压缩、bucket 选择、对象写入和最终 URL 生成。
+
+插件也支持 `Public Upload Link` 模式，可以填公开上传 UUID，或完整的 `/api/public-uploads/:uuid` 地址。
+
 <h2 id="tech-stack">技术栈</h2>
 
 - **前端**：Next.js 16、React 19、TypeScript、Tailwind CSS 4、shadcn/ui、Lucide React
@@ -252,6 +274,7 @@ src/lib/storage/                 存储 provider adapter 和共享类型
 src/lib/auth/                    GitHub OAuth、session、API key 鉴权
 src/lib/uploads/                 直接上传和 multipart 编排
 src/components/ui/               shadcn/ui 基础组件
+integrations/                    GioPic 等外部工具接入示例
 deploy/                          Nginx 部署示例
 docs/                            GitHub Pages 中文文档站
 ```
