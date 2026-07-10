@@ -8,6 +8,8 @@ import {
 } from '@/lib/storage-config';
 import { and, eq } from 'drizzle-orm';
 import { NextRequest } from 'next/server';
+import { Readable } from 'node:stream';
+import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 
 export const runtime = 'nodejs';
 
@@ -29,6 +31,62 @@ function assertUploadCanReceiveParts(upload: typeof fileUploads.$inferSelect) {
   }
 }
 
+type PartRequestBody = {
+  partNumber: number;
+  contentLength: number;
+  buffer?: Buffer;
+  stream?: ReadableStream<Uint8Array>;
+};
+
+function parsePartNumber(value: string | null) {
+  const partNumber = value ? Number.parseInt(value, 10) : NaN;
+  if (!Number.isInteger(partNumber) || partNumber <= 0 || partNumber > 10000) {
+    throw new HttpError(400, 'BAD_REQUEST', 'Invalid part_number');
+  }
+  return partNumber;
+}
+
+async function readPartRequest(request: NextRequest): Promise<PartRequestBody> {
+  const contentType = request.headers.get('content-type')?.toLowerCase() ?? '';
+  if (contentType.startsWith('application/octet-stream')) {
+    const contentLength = Number.parseInt(
+      request.headers.get('content-length') ?? '',
+      10,
+    );
+    if (!Number.isSafeInteger(contentLength) || contentLength <= 0) {
+      throw new HttpError(400, 'BAD_REQUEST', 'Invalid Content-Length');
+    }
+    if (!request.body) {
+      throw new HttpError(400, 'BAD_REQUEST', 'Missing chunk body');
+    }
+    return {
+      partNumber: parsePartNumber(
+        request.nextUrl.searchParams.get('part_number'),
+      ),
+      contentLength,
+      stream: request.body,
+    };
+  }
+
+  const formData = await request.formData().catch(() => null);
+  if (!formData) {
+    throw new HttpError(400, 'BAD_REQUEST', 'Invalid form data');
+  }
+  const partNumberValue = formData.get('part_number');
+  const chunk = formData.get('chunk');
+  if (typeof partNumberValue !== 'string') {
+    throw new HttpError(400, 'BAD_REQUEST', 'Missing or invalid part_number');
+  }
+  if (!(chunk instanceof Blob)) {
+    throw new HttpError(400, 'BAD_REQUEST', 'Missing or invalid chunk file');
+  }
+  return {
+    partNumber: parsePartNumber(partNumberValue),
+    contentLength: chunk.size,
+    buffer: Buffer.from(await chunk.arrayBuffer()),
+  };
+}
+
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -37,24 +95,8 @@ export async function POST(
     const auth = await getAuthContext(request, ['uploads:write']);
     const { id } = await context.params;
 
-    const formData = await request.formData().catch(() => null);
-    if (!formData) {
-      throw new HttpError(400, 'BAD_REQUEST', 'Invalid form data');
-    }
-
-    const partNumberStr = formData.get('part_number');
-    if (!partNumberStr || typeof partNumberStr !== 'string') {
-      throw new HttpError(400, 'BAD_REQUEST', 'Missing or invalid part_number');
-    }
-    const partNumber = parseInt(partNumberStr, 10);
-    if (isNaN(partNumber) || partNumber <= 0 || partNumber > 10000) {
-      throw new HttpError(400, 'BAD_REQUEST', 'Invalid part_number');
-    }
-
-    const chunk = formData.get('chunk');
-    if (!(chunk instanceof Blob)) {
-      throw new HttpError(400, 'BAD_REQUEST', 'Missing or invalid chunk file');
-    }
+    const partRequest = await readPartRequest(request);
+    const partNumber = partRequest.partNumber;
 
     const [upload] = await db
       .select()
@@ -85,7 +127,7 @@ export async function POST(
     if (!part) {
       throw new HttpError(400, 'BAD_REQUEST', 'Invalid part_number');
     }
-    if (chunk.size !== part.partSize) {
+    if (partRequest.contentLength !== part.partSize) {
       throw new HttpError(
         400,
         'BAD_REQUEST',
@@ -118,17 +160,28 @@ export async function POST(
       .set({ status: 'uploading', updatedAt: new Date().toISOString() })
       .where(eq(fileUploads.id, upload.id));
 
-    const buffer = Buffer.from(await chunk.arrayBuffer());
-
-    const result = await adapter.uploadPart({
+    const commonInput = {
       bucket: bucket.name,
       region: bucket.region ?? undefined,
       key: upload.objectKey,
       uploadId: upload.providerUploadId,
-      partNumber: partNumber,
-      body: buffer,
-      contentLength: buffer.byteLength,
-    });
+      partNumber,
+      contentLength: partRequest.contentLength,
+    };
+    const result =
+      partRequest.stream && adapter.uploadPartStream
+        ? await adapter.uploadPartStream({
+            ...commonInput,
+            body: Readable.fromWeb(
+              partRequest.stream as NodeReadableStream<Uint8Array>,
+            ),
+          })
+        : await adapter.uploadPart({
+            ...commonInput,
+            body:
+              partRequest.buffer ??
+              Buffer.from(await new Response(partRequest.stream).arrayBuffer()),
+          });
 
     return ok({
       part_number: result.partNumber,

@@ -1,3 +1,5 @@
+import type { Readable } from 'node:stream';
+
 export const STORAGE_PROVIDER_IDS = [
   's3',
   'r2',
@@ -196,6 +198,11 @@ export interface UploadPartInput {
   contentLength?: number;
 }
 
+export interface UploadPartStreamInput extends Omit<UploadPartInput, 'body'> {
+  body: Readable;
+  contentLength: number;
+}
+
 export interface UploadPartResult {
   bucket: string;
   key: string;
@@ -218,6 +225,7 @@ export interface StorageAdapter {
     input: CreateMultipartUploadInput,
   ): Promise<CreateMultipartUploadResult>;
   uploadPart(input: UploadPartInput): Promise<UploadPartResult>;
+  uploadPartStream?(input: UploadPartStreamInput): Promise<UploadPartResult>;
   completeMultipartUpload(
     input: CompleteMultipartUploadInput,
   ): Promise<CompleteMultipartUploadResult>;

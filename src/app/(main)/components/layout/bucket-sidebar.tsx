@@ -202,10 +202,10 @@ export function BucketSidebar({
                 onClick={onCreateAccount}
               >
                 <Plus />
-                <span className="sr-only">新增账号</span>
+                <span className="sr-only">添加账号</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>新增账号</TooltipContent>
+            <TooltipContent>添加账号</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
@@ -298,7 +298,7 @@ export function BucketSidebar({
               </EmptyHeader>
               <Button size="sm" onClick={onCreateAccount}>
                 <Plus data-icon="inline-start" />
-                新增账号
+                添加账号
               </Button>
             </Empty>
           )}

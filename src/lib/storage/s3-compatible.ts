@@ -36,6 +36,7 @@ import type {
   StorageObjectItem,
   UploadPartInput,
   UploadPartResult,
+  UploadPartStreamInput,
 } from './types';
 import {
   basenameFromObjectPath,
@@ -162,6 +163,28 @@ export class S3CompatibleStorageAdapter implements StorageAdapter {
         PartNumber: input.partNumber,
         Body: input.body,
         ContentLength: input.contentLength ?? input.body.byteLength,
+      }),
+    );
+
+    return {
+      bucket: input.bucket,
+      key: input.key,
+      partNumber: input.partNumber,
+      etag: output.ETag ?? '',
+    };
+  }
+
+  async uploadPartStream(
+    input: UploadPartStreamInput,
+  ): Promise<UploadPartResult> {
+    const output = await this.client.send(
+      new UploadPartCommand({
+        Bucket: input.bucket,
+        Key: normalizeObjectKey(input.key),
+        UploadId: input.uploadId,
+        PartNumber: input.partNumber,
+        Body: input.body,
+        ContentLength: input.contentLength,
       }),
     );
 

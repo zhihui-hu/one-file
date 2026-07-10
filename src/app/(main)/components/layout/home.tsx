@@ -288,27 +288,23 @@ export function OneFileHome() {
             <EmptyMedia variant="icon">
               <Database />
             </EmptyMedia>
-            <EmptyTitle>
-              {isAdmin ? '配置第一个存储账号' : '等待管理员配置存储'}
-            </EmptyTitle>
+            <EmptyTitle>添加存储账号</EmptyTitle>
             <EmptyDescription>
-              {isAdmin
-                ? '添加对象存储账号后同步 bucket，或导入已有 SQL 备份文件恢复数据。'
-                : '当前还没有可用的存储数据，请联系管理员新增账号或导入备份。'}
+              添加对象存储账号后同步 bucket，即可开始上传和管理文件。
             </EmptyDescription>
           </EmptyHeader>
-          {isAdmin && (
-            <EmptyContent className="sm:flex-row sm:justify-center">
-              <Button onClick={() => setCreateAccountOpen(true)}>
-                <Plus data-icon="inline-start" />
-                新增账号
-              </Button>
+          <EmptyContent className="sm:flex-row sm:justify-center">
+            <Button onClick={() => setCreateAccountOpen(true)}>
+              <Plus data-icon="inline-start" />
+              添加账号
+            </Button>
+            {isAdmin && (
               <Button variant="outline" onClick={() => setBackupOpen(true)}>
                 <FileUp data-icon="inline-start" />
                 导入文件
               </Button>
-            </EmptyContent>
-          )}
+            )}
+          </EmptyContent>
         </Empty>
 
         {storageDialogOpen && (
