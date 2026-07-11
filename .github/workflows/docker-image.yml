@@ -5,11 +5,25 @@ on:
     tags:
       - 'v*.*.*'
       - '*.*.*'
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy after publishing the image
+        type: boolean
+        required: false
+        default: true
+
 permissions:
   contents: read
   packages: write
+
 env:
   REGISTRY: ghcr.io
+
+concurrency:
+  group: docker-image-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Build ${{ matrix.platform }}
@@ -56,8 +70,8 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=tag
-            type=sha,prefix=sha-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=sha-${{ github.sha }}
+            type=raw,value=latest
 
       - name: Build and push Docker image
         id: build
@@ -121,8 +135,8 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=tag
-            type=sha,prefix=sha-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=sha-${{ github.sha }}
+            type=raw,value=latest
 
       - name: Create and push manifest list
         working-directory: /tmp/digests
@@ -132,3 +146,70 @@ jobs:
           docker buildx imagetools create \
             $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf "$IMAGE@sha256:%s " *)
+
+      - name: Inspect published image
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}
+        run: docker buildx imagetools inspect "$IMAGE:sha-${{ github.sha }}"
+
+  deploy:
+    name: Deploy with Docker Compose
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - merge
+    if: github.event_name == 'push' || inputs.deploy
+    concurrency:
+      group: onefile-production-deploy
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare deployment image
+        id: image
+        shell: bash
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+        run: |
+          name="${GITHUB_REPOSITORY,,}"
+          echo "ref=$REGISTRY/$name:sha-$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Validate deployment secrets
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          missing=0
+          for name in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS; do
+            if [ -z "${!name:-}" ]; then
+              echo "$name is required" >&2
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Configure SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: bash .github/scripts/configure-ssh.sh
+
+      - name: Deploy image
+        shell: bash
+        env:
+          SSH_HOST: onefile-deploy
+          REMOTE_DIR: ${{ secrets.DEPLOY_REMOTE_DIR || '/opt/onefile' }}
+          ONEFILE_IMAGE: ${{ steps.image.outputs.ref }}
+          COMPOSE_PROJECT_NAME: ${{ vars.DEPLOY_COMPOSE_PROJECT_NAME || 'onefile' }}
+          COMPOSE_SERVICE_NAME: onefile
+          USE_SUDO: ${{ vars.DEPLOY_USE_SUDO || '0' }}
+          LOG_TAIL: ${{ vars.DEPLOY_LOG_TAIL || '120' }}
+        run: bash .github/scripts/deploy-docker-compose.sh

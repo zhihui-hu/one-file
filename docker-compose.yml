@@ -1,6 +1,6 @@
 services:
   onefile:
-    image: ${ONEFILE_IMAGE:-ghcr.io/zhihui-hu/one-file:latest}
+    image: ${ONEFILE_IMAGE:-ghcr.io/zhihui-hu/onefile:latest}
     pull_policy: ${ONEFILE_PULL_POLICY:-always}
     restart: unless-stopped
     init: true
